@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>7.0</ProjectVersion>
     <ToolchainName>com.HPInfoTech.CodeVisionAVR.C</ToolchainName>
-    <ProjectGuid>{A2785FFA-423D-497C-A76A-A46C3F34E8A0}</ProjectGuid>
+    <ProjectGuid>{5D383525-423D-497C-A76A-A46C3F34E8A0}</ProjectGuid>
     <avrdevice>ATmega128</avrdevice>
     <avrdeviceseries>none</avrdeviceseries>
     <OutputType>Executable</OutputType>
@@ -12,9 +12,9 @@
     <OutputFileName>$(MSBuildProjectName)</OutputFileName>
     <OutputFileExtension>.cof</OutputFileExtension>
     <OutputDirectory>$(MSBuildProjectDirectory)\$(Configuration)</OutputDirectory>
-    <AssemblyName>LED</AssemblyName>
-    <Name>LED</Name>
-    <RootNamespace>LED</RootNamespace>
+    <AssemblyName>SWITCH</AssemblyName>
+    <Name>SWITCH</Name>
+    <RootNamespace>SWITCH</RootNamespace>
     <ToolchainFlavour>Native</ToolchainFlavour>
     <KeepTimersRunning>true</KeepTimersRunning>
     <OverrideVtor>false</OverrideVtor>
@@ -24,21 +24,21 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <ToolchainSettings>
       <CV>
-        <CVProjectPath>"LED.prj"</CVProjectPath>
+        <CVProjectPath>"SWITCH.prj"</CVProjectPath>
       </CV>
     </ToolchainSettings>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <ToolchainSettings>
       <CV>
-        <CVProjectPath>"LED.prj"</CVProjectPath>
+        <CVProjectPath>"SWITCH.prj"</CVProjectPath>
       </CV>
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SWITCH.c">
+    <Compile Include="SWITCH3.c">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>

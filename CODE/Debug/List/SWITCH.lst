@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.1.30  D:\ELE_2018\CODE\Debug\List\LED.asm Mon Mar 26 13:59:19 2018
+AVRASM ver. 2.1.30  D:\ELE_2018\CODE\Debug\List\SWITCH.asm Mon Mar 26 15:19:16 2018
 
                  
                  
@@ -1192,9 +1192,11 @@ AVRASM ver. 2.1.30  D:\ELE_2018\CODE\Debug\List\LED.asm Mon Mar 26 13:59:19 2018
                  	.ORG 0x500
                  
                  	.CSEG
-                 ;/* SWITCH1.c
-                 ; *
-                 ; * Created  2018-03-26 오후 13:53:17
+                 ;/* SWITCH3.c
+                 ; * 왕복으로 On되어진 LED를 이동하지만,
+                 ;    PORTC.0을 눌렀을때 현재상태 멈춤
+                 ;    PORTC.1을 눌렀을때 현재상태부터 다시 이동
+                 ; * Created  2018-03-26 오후 14:53:50
                  ; * Author: KHJ
                  ; */
                  ; #include <mega128.h>
@@ -1211,32 +1213,95 @@ AVRASM ver. 2.1.30  D:\ELE_2018\CODE\Debug\List\LED.asm Mon Mar 26 13:59:19 2018
                  	#endif
                  ; #include <delay.h>
                  ;
-                 ; void main(){
-                 ; 0000 0009 void main(){
+                 ; void main() {
+                 ; 0000 000B void main() {
                  
                  	.CSEG
                  _main:
                  ; .FSTART _main
-                 ; 0000 000A     DDRA=0xff;
-000064 efef      	LDI  R30,LOW(255)
-000065 bbea      	OUT  0x1A,R30
-                 ; 0000 000B     DDRC=0x00;
-000066 e0e0      	LDI  R30,LOW(0)
-000067 bbe4      	OUT  0x14,R30
-                 ; 0000 000C     while(1) {
+                 ; 0000 000C     unsigned char turn = 0;
+                 ; 0000 000D     DDRA = 0xff;
+                 ;	turn -> R17
+000064 e010      	LDI  R17,0
+000065 efef      	LDI  R30,LOW(255)
+000066 bbea      	OUT  0x1A,R30
+                 ; 0000 000E     DDRC = 0x00;
+000067 e0e0      	LDI  R30,LOW(0)
+000068 bbe4      	OUT  0x14,R30
+                 ; 0000 000F     PORTA = 0x01;
+000069 e0e1      	LDI  R30,LOW(1)
+00006a bbeb      	OUT  0x1B,R30
+                 ; 0000 0010     while(1) {
                  _0x3:
-                 ; 0000 000D         PORTA = PINC;
-000068 b3e3      	IN   R30,0x13
-000069 bbeb      	OUT  0x1B,R30
-                 ; 0000 000E         delay_ms(200);
-00006a eca8      	LDI  R26,LOW(200)
-00006b e0b0      	LDI  R27,0
-00006c d002      	RCALL _delay_ms
-                 ; 0000 000F         }
-00006d cffa      	RJMP _0x3
-                 ; 0000 0010  }
-                 _0x6:
-00006e cfff      	RJMP _0x6
+                 ; 0000 0011         for(;turn < 7;turn++) {
+                 _0x7:
+00006b 3017      	CPI  R17,7
+00006c f468      	BRSH _0x8
+                 ; 0000 0012             PORTA = PORTA << 1;
+00006d b3eb      	IN   R30,0x1B
+00006e 0fee      	LSL  R30
+00006f bbeb      	OUT  0x1B,R30
+                 ; 0000 0013             if(PINC.0 == 1) {
+000070 9b98      	SBIS 0x13,0
+000071 c003      	RJMP _0x9
+                 ; 0000 0014                 for(;;) {
+                 _0xB:
+                 ; 0000 0015                     if(PINC.1 == 1) {
+000072 9999      	SBIC 0x13,1
+                 ; 0000 0016                         break;
+000073 c001      	RJMP _0xC
+                 ; 0000 0017                     }
+                 ; 0000 0018                 }
+000074 cffd      	RJMP _0xB
+                 _0xC:
+                 ; 0000 0019             }
+                 ; 0000 001A             delay_ms(150);
+                 _0x9:
+000075 e9a6      	LDI  R26,LOW(150)
+000076 e0b0      	LDI  R27,0
+000077 d015      	RCALL _delay_ms
+                 ; 0000 001B         }
+000078 5f1f      	SUBI R17,-1
+000079 cff1      	RJMP _0x7
+                 _0x8:
+                 ; 0000 001C         for(;turn > 0; turn--) {
+                 _0xF:
+00007a 3011      	CPI  R17,1
+00007b f078      	BRLO _0x10
+                 ; 0000 001D             PORTA = PORTA >> 1;
+00007c b3eb      	IN   R30,0x1B
+00007d e0f0      	LDI  R31,0
+00007e 95f5      	ASR  R31
+00007f 95e7      	ROR  R30
+000080 bbeb      	OUT  0x1B,R30
+                 ; 0000 001E             if(PINC.0 == 1) {
+000081 9b98      	SBIS 0x13,0
+000082 c003      	RJMP _0x11
+                 ; 0000 001F                 for(;;) {
+                 _0x13:
+                 ; 0000 0020                     if(PINC.1 == 1) {
+000083 9999      	SBIC 0x13,1
+                 ; 0000 0021                         break;
+000084 c001      	RJMP _0x14
+                 ; 0000 0022                     }
+                 ; 0000 0023                 }
+000085 cffd      	RJMP _0x13
+                 _0x14:
+                 ; 0000 0024             }
+                 ; 0000 0025             delay_ms(150);
+                 _0x11:
+000086 e9a6      	LDI  R26,LOW(150)
+000087 e0b0      	LDI  R27,0
+000088 d004      	RCALL _delay_ms
+                 ; 0000 0026         }
+000089 5011      	SUBI R17,1
+00008a cfef      	RJMP _0xF
+                 _0x10:
+                 ; 0000 0027     }
+00008b cfdf      	RJMP _0x3
+                 ; 0000 0028  }
+                 _0x16:
+00008c cfff      	RJMP _0x16
                  ; .FEND
                  
                  	.CSEG
@@ -1244,21 +1309,21 @@ AVRASM ver. 2.1.30  D:\ELE_2018\CODE\Debug\List\LED.asm Mon Mar 26 13:59:19 2018
                  
                  	.CSEG
                  _delay_ms:
-00006f 9610      	adiw r26,0
-000070 f039      	breq __delay_ms1
+00008d 9610      	adiw r26,0
+00008e f039      	breq __delay_ms1
                  __delay_ms0:
-000071 95a8      	wdr
+00008f 95a8      	wdr
                 +
-000072 ea80     +LDI R24 , LOW ( 0xFA0 )
-000073 e09f     +LDI R25 , HIGH ( 0xFA0 )
+000090 ea80     +LDI R24 , LOW ( 0xFA0 )
+000091 e09f     +LDI R25 , HIGH ( 0xFA0 )
                 +__DELAY_USW_LOOP :
-000074 9701     +SBIW R24 , 1
-000075 f7f1     +BRNE __DELAY_USW_LOOP
+000092 9701     +SBIW R24 , 1
+000093 f7f1     +BRNE __DELAY_USW_LOOP
                  	__DELAY_USW 0xFA0
-000076 9711      	sbiw r26,1
-000077 f7c9      	brne __delay_ms0
+000094 9711      	sbiw r26,1
+000095 f7c9      	brne __delay_ms0
                  __delay_ms1:
-000078 9508      	ret
+000096 9508      	ret
                  
                  ;END OF CODE MARKER
                  __END_OF_CODE:
@@ -1281,38 +1346,38 @@ counted separately from r26..r31 here.
 ATmega128 register use summary:
 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 r5 :   0 r6 :   0 r7 :   0 
 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 r13:   0 r14:   0 r15:   0 
-r16:   0 r17:   0 r18:   0 r19:   0 r20:   0 r21:   0 r22:   0 r23:   0 
-r24:   7 r25:   2 r26:   5 r27:   3 r28:   1 r29:   1 r30:  16 r31:   2 
+r16:   0 r17:   5 r18:   0 r19:   0 r20:   0 r21:   0 r22:   0 r23:   0 
+r24:   7 r25:   2 r26:   6 r27:   4 r28:   1 r29:   1 r30:  22 r31:   4 
 x  :   2 y  :   0 z  :   0 
-Registers used: 9 out of 35 (25.7%)
+Registers used: 10 out of 35 (28.6%)
 
 ATmega128 instruction use summary:
 .lds  :   0 .lds.l:   0 .sts  :   0 .sts.l:   0 adc   :   0 add   :   0 
-adiw  :   1 and   :   0 andi  :   0 asr   :   0 bclr  :   0 bld   :   0 
+adiw  :   1 and   :   0 andi  :   0 asr   :   1 bclr  :   0 bld   :   0 
 brbc  :   0 brbs  :   0 brcc  :   0 brcs  :   0 break :   0 breq  :   1 
-brge  :   0 brhc  :   0 brhs  :   0 brid  :   0 brie  :   0 brlo  :   0 
-brlt  :   0 brmi  :   0 brne  :   4 brpl  :   0 brsh  :   0 brtc  :   0 
+brge  :   0 brhc  :   0 brhs  :   0 brid  :   0 brie  :   0 brlo  :   1 
+brlt  :   0 brmi  :   0 brne  :   4 brpl  :   0 brsh  :   1 brtc  :   0 
 brts  :   0 brvc  :   0 brvs  :   0 bset  :   0 bst   :   0 call  :   0 
 cbi   :   0 cbr   :   0 clc   :   0 clh   :   0 cli   :   1 cln   :   0 
 clr   :   2 cls   :   0 clt   :   0 clv   :   0 clz   :   0 com   :   0 
-cp    :   0 cpc   :   0 cpi   :   0 cpse  :   0 dec   :   1 des   :   0 
+cp    :   0 cpc   :   0 cpi   :   2 cpse  :   0 dec   :   1 des   :   0 
 elpm  :   0 eor   :   0 fmul  :   0 fmuls :   0 fmulsu:   0 icall :   0 
-ijmp  :   0 in    :   1 inc   :   0 jmp   :  36 ld    :   0 ldd   :   0 
-ldi   :  17 lds   :   0 lpm   :   0 lsl   :   0 lsr   :   0 mov   :   0 
+ijmp  :   0 in    :   2 inc   :   0 jmp   :  36 ld    :   0 ldd   :   0 
+ldi   :  22 lds   :   0 lpm   :   0 lsl   :   1 lsr   :   0 mov   :   0 
 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 neg   :   0 nop   :   0 
-or    :   0 ori   :   0 out   :   9 pop   :   0 push  :   0 rcall :   1 
-ret   :   1 reti  :   0 rjmp  :   2 rol   :   0 ror   :   0 sbc   :   0 
-sbci  :   0 sbi   :   0 sbic  :   0 sbis  :   0 sbiw  :   3 sbr   :   0 
+or    :   0 ori   :   0 out   :  11 pop   :   0 push  :   0 rcall :   2 
+ret   :   1 reti  :   0 rjmp  :  10 rol   :   0 ror   :   1 sbc   :   0 
+sbci  :   0 sbi   :   0 sbic  :   2 sbis  :   2 sbiw  :   3 sbr   :   0 
 sbrc  :   0 sbrs  :   0 sec   :   0 seh   :   0 sei   :   0 sen   :   0 
 ser   :   0 ses   :   0 set   :   0 sev   :   0 sez   :   0 sleep :   0 
-spm   :   0 st    :   2 std   :   0 sts   :   1 sub   :   0 subi  :   0 
+spm   :   0 st    :   2 std   :   0 sts   :   1 sub   :   0 subi  :   2 
 swap  :   0 tst   :   0 wdr   :   1 
-Instructions used: 17 out of 117 (14.5%)
+Instructions used: 26 out of 117 (22.2%)
 
 ATmega128 memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x0000f2    242      0    242  131072   0.2%
+[.cseg] 0x000000 0x00012e    302      0    302  131072   0.2%
 [.dseg] 0x000100 0x000500      0      0      0    4096   0.0%
 [.eseg] 0x000000 0x000000      0      0      0    4096   0.0%
 

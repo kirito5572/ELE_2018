@@ -11,7 +11,8 @@
  #include <mega128.h>
  #include <delay.h>
  
- void main(){ 
+ void main(){
+    int turn; 
     DDRA = 0xff;
     PORTA = 0x01;
     while(1){ 

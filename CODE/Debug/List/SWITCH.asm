@@ -1188,9 +1188,11 @@ __CLEAR_SRAM:
 	.ORG 0x500
 
 	.CSEG
-;/* SWITCH1.c
-; *
-; * Created  2018-03-26 오후 13:53:17
+;/* SWITCH3.c
+; * 왕복으로 On되어진 LED를 이동하지만,
+;    PORTC.0을 눌렀을때 현재상태 멈춤
+;    PORTC.1을 눌렀을때 현재상태부터 다시 이동
+; * Created  2018-03-26 오후 14:53:50
 ; * Author: KHJ
 ; */
 ; #include <mega128.h>
@@ -1207,32 +1209,95 @@ __CLEAR_SRAM:
 	#endif
 ; #include <delay.h>
 ;
-; void main(){
-; 0000 0009 void main(){
+; void main() {
+; 0000 000B void main() {
 
 	.CSEG
 _main:
 ; .FSTART _main
-; 0000 000A     DDRA=0xff;
+; 0000 000C     unsigned char turn = 0;
+; 0000 000D     DDRA = 0xff;
+;	turn -> R17
+	LDI  R17,0
 	LDI  R30,LOW(255)
 	OUT  0x1A,R30
-; 0000 000B     DDRC=0x00;
+; 0000 000E     DDRC = 0x00;
 	LDI  R30,LOW(0)
 	OUT  0x14,R30
-; 0000 000C     while(1) {
-_0x3:
-; 0000 000D         PORTA = PINC;
-	IN   R30,0x13
+; 0000 000F     PORTA = 0x01;
+	LDI  R30,LOW(1)
 	OUT  0x1B,R30
-; 0000 000E         delay_ms(200);
-	LDI  R26,LOW(200)
+; 0000 0010     while(1) {
+_0x3:
+; 0000 0011         for(;turn < 7;turn++) {
+_0x7:
+	CPI  R17,7
+	BRSH _0x8
+; 0000 0012             PORTA = PORTA << 1;
+	IN   R30,0x1B
+	LSL  R30
+	OUT  0x1B,R30
+; 0000 0013             if(PINC.0 == 1) {
+	SBIS 0x13,0
+	RJMP _0x9
+; 0000 0014                 for(;;) {
+_0xB:
+; 0000 0015                     if(PINC.1 == 1) {
+	SBIC 0x13,1
+; 0000 0016                         break;
+	RJMP _0xC
+; 0000 0017                     }
+; 0000 0018                 }
+	RJMP _0xB
+_0xC:
+; 0000 0019             }
+; 0000 001A             delay_ms(150);
+_0x9:
+	LDI  R26,LOW(150)
 	LDI  R27,0
 	RCALL _delay_ms
-; 0000 000F         }
+; 0000 001B         }
+	SUBI R17,-1
+	RJMP _0x7
+_0x8:
+; 0000 001C         for(;turn > 0; turn--) {
+_0xF:
+	CPI  R17,1
+	BRLO _0x10
+; 0000 001D             PORTA = PORTA >> 1;
+	IN   R30,0x1B
+	LDI  R31,0
+	ASR  R31
+	ROR  R30
+	OUT  0x1B,R30
+; 0000 001E             if(PINC.0 == 1) {
+	SBIS 0x13,0
+	RJMP _0x11
+; 0000 001F                 for(;;) {
+_0x13:
+; 0000 0020                     if(PINC.1 == 1) {
+	SBIC 0x13,1
+; 0000 0021                         break;
+	RJMP _0x14
+; 0000 0022                     }
+; 0000 0023                 }
+	RJMP _0x13
+_0x14:
+; 0000 0024             }
+; 0000 0025             delay_ms(150);
+_0x11:
+	LDI  R26,LOW(150)
+	LDI  R27,0
+	RCALL _delay_ms
+; 0000 0026         }
+	SUBI R17,1
+	RJMP _0xF
+_0x10:
+; 0000 0027     }
 	RJMP _0x3
-; 0000 0010  }
-_0x6:
-	RJMP _0x6
+; 0000 0028  }
+_0x16:
+	RJMP _0x16
 ; .FEND
 
 	.CSEG
