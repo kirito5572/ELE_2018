@@ -1,0 +1,10 @@
+/*
+ * FND2.c
+ *
+ * Created: 2018-04-03 ¿ÀÈÄ 2:10:59
+ * Author: KHJ
+ */
+
+ #include <mega128.h>
+
+ void main(void) {

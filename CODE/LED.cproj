@@ -38,7 +38,7 @@
   <ItemGroup>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SWITCH.c">
+    <Compile Include="SWITCH4.c">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>

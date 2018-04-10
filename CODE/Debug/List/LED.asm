@@ -1188,9 +1188,9 @@ __CLEAR_SRAM:
 	.ORG 0x500
 
 	.CSEG
-;/* SWITCH1.c
+;/* SWITCH4.c
 ; *
-; * Created  2018-03-26 오후 13:53:17
+; * Created  2018-03-27 오후 12:15:01
 ; * Author: KHJ
 ; */
 ; #include <mega128.h>
@@ -1207,35 +1207,140 @@ __CLEAR_SRAM:
 	#endif
 ; #include <delay.h>
 ;
-; void main(){
-; 0000 0009 void main(){
+; void main() {
+; 0000 0009 void main() {
 
 	.CSEG
 _main:
 ; .FSTART _main
-; 0000 000A     DDRA=0xff;
+; 0000 000A     char On_Off;
+; 0000 000B     DDRA = 0xff;
+;	On_Off -> R17
 	LDI  R30,LOW(255)
 	OUT  0x1A,R30
-; 0000 000B     DDRC=0x00;
+; 0000 000C     DDRC = 0x00;
 	LDI  R30,LOW(0)
 	OUT  0x14,R30
-; 0000 000C     while(1) {
+; 0000 000D     while(1) {
 _0x3:
-; 0000 000D         PORTA = PINC;
+; 0000 000E         switch(PINC) {
 	IN   R30,0x13
+; 0000 000F         case 0: PORTA = 0x0f;
+	CPI  R30,0
+	BRNE _0x9
+	LDI  R30,LOW(15)
+	RCALL SUBOPT_0x0
+; 0000 0010                 delay_ms(200);
+; 0000 0011                 PORTA = 0xf0;
+	LDI  R30,LOW(240)
+	RCALL SUBOPT_0x0
+; 0000 0012                 delay_ms(200);
+; 0000 0013                 break;
+	RJMP _0x8
+; 0000 0014         case 1: PORTA = 0x01;
+_0x9:
+	CPI  R30,LOW(0x1)
+	BRNE _0xA
+	LDI  R30,LOW(1)
 	OUT  0x1B,R30
-; 0000 000E         delay_ms(200);
-	LDI  R26,LOW(200)
+; 0000 0015                 while(PINC == 1) {
+_0xB:
+	IN   R30,0x13
+	CPI  R30,LOW(0x1)
+	BRNE _0xD
+; 0000 0016                     delay_ms(150);
+	LDI  R26,LOW(150)
 	LDI  R27,0
 	RCALL _delay_ms
-; 0000 000F         }
+; 0000 0017                     PORTA = PORTA << 1;
+	IN   R30,0x1B
+	LSL  R30
+	OUT  0x1B,R30
+; 0000 0018                     if(PINC == 2) {
+	IN   R30,0x13
+	CPI  R30,LOW(0x2)
+	BRNE _0xE
+; 0000 0019                         for(;;) {
+_0x10:
+; 0000 001A                             if(PINC != 2) {
+	IN   R30,0x13
+	CPI  R30,LOW(0x2)
+	BREQ _0x10
+; 0000 001B                                 break;
+; 0000 001C                             }
+; 0000 001D                         }
+; 0000 001E                     }
+; 0000 001F                     if(PORTA == 0x00) {
+_0xE:
+	IN   R30,0x1B
+	CPI  R30,0
+	BRNE _0x13
+; 0000 0020                         PORTA = 0x01;
+	LDI  R30,LOW(1)
+	OUT  0x1B,R30
+; 0000 0021                     }
+; 0000 0022                 }
+_0x13:
+	RJMP _0xB
+_0xD:
+; 0000 0023                 break;
+	RJMP _0x8
+; 0000 0024 
+; 0000 0025         case 2: break;
+_0xA:
+	CPI  R30,LOW(0x2)
+	BREQ _0x8
+; 0000 0026 
+; 0000 0027         case 3: for(On_Off = 0; On_Off < 5; On_Off++) {
+	CPI  R30,LOW(0x3)
+	BRNE _0x8
+	LDI  R17,LOW(0)
+_0x17:
+	CPI  R17,5
+	BRSH _0x18
+; 0000 0028                     PORTA = 0x00;
+	LDI  R30,LOW(0)
+	RCALL SUBOPT_0x0
+; 0000 0029                     delay_ms(200);
+; 0000 002A                     PORTA = 0xff;
+	LDI  R30,LOW(255)
+	RCALL SUBOPT_0x0
+; 0000 002B                     delay_ms(200);
+; 0000 002C                 }
+	SUBI R17,-1
+	RJMP _0x17
+_0x18:
+; 0000 002D                 break;
+; 0000 002E 
+; 0000 002F         }
+_0x8:
+; 0000 0030         if(On_Off < 5) {
+	CPI  R17,5
+	BRSH _0x19
+; 0000 0031             while(1); {
+_0x1A:
+	RJMP _0x1A
+; 0000 0032                 if(PINC != 3) {
+; 0000 0033                     break;
+; 0000 0034                 }
+; 0000 0035             }
+; 0000 0036         }
+; 0000 0037     }
+_0x19:
 	RJMP _0x3
-; 0000 0010  }
-_0x6:
-	RJMP _0x6
+; 0000 0038  }
+_0x1E:
+	RJMP _0x1E
 ; .FEND
 
 	.CSEG
+;OPTIMIZER ADDED SUBROUTINE, CALLED 4 TIMES, CODE SIZE REDUCTION:7 WORDS
+SUBOPT_0x0:
+	OUT  0x1B,R30
+	LDI  R26,LOW(200)
+	LDI  R27,0
+	RJMP _delay_ms
+
 ;RUNTIME LIBRARY
 
 	.CSEG
