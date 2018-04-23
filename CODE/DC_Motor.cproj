@@ -38,7 +38,7 @@
   <ItemGroup>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Motor3.c">
+    <Compile Include="Motor4.c">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>

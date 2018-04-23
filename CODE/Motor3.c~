@@ -7,7 +7,6 @@
 
 #include <mega128.h>
 #include <delay.h>
-#define MOTOR PORTB
 unsigned int speed;
 void main(void) {
     DDRA = 0xff;

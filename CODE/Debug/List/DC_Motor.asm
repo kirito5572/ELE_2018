@@ -1193,13 +1193,13 @@ __CLEAR_SRAM:
 
 	.CSEG
 ;/*
-; * MOTOR1.c
-; * 모터를 정방향으로 회전시키기
-; * Created: 2018-04-16 오후 12:23:59
+; * MOTOR4.c
+; *
+; * Created: 2018-04-23 오후 01:24:52s
 ; * Author: KHJ
 ; */
 ;
-;#include <mega128.h>
+; #include <mega128.h>
 	#ifndef __SLEEP_DEFINED__
 	#define __SLEEP_DEFINED__
 	.EQU __se_bit=0x20
@@ -1211,54 +1211,46 @@ __CLEAR_SRAM:
 	.EQU __sm_adc_noise_red=0x08
 	.SET power_ctrl_reg=mcucr
 	#endif
-;#include <delay.h>
-;#define MOTOR PORTB
-;unsigned int speed;
-;void main(void) {
+; #include <delay.h>
+; #define MOTOR PORTB
+; unsigned int speed;
+; void main(void) {
 ; 0000 000C void main(void) {
 
 	.CSEG
 _main:
 ; .FSTART _main
-; 0000 000D     DDRA = 0xff;
-	LDI  R30,LOW(255)
-	OUT  0x1A,R30
-; 0000 000E     DDRB = 0xff;
+; 0000 000D     DDRB = 0xf0;
+	LDI  R30,LOW(240)
 	OUT  0x17,R30
-; 0000 000F     DDRC = 0x00;
+; 0000 000E     DDRC = 0x00;
 	LDI  R30,LOW(0)
 	OUT  0x14,R30
-; 0000 0010     TCCR1A = 0b11000001;
-	LDI  R30,LOW(193)
+; 0000 000F     TCCR1A = 0b10000001;
+	LDI  R30,LOW(129)
 	OUT  0x2F,R30
-; 0000 0011     TCCR1B = 0b00000101;
+; 0000 0010     TCCR1B = 0b00000101;
 	LDI  R30,LOW(5)
 	OUT  0x2E,R30
-; 0000 0012     TCNT1 = 0x0000;
+; 0000 0011     TCNT1 = 0x0000;
 	LDI  R30,LOW(0)
 	LDI  R31,HIGH(0)
 	OUT  0x2C+1,R31
 	OUT  0x2C,R30
-; 0000 0013     SREG = 0x80;
-	LDI  R30,LOW(128)
-	OUT  0x3F,R30
-; 0000 0014 
-; 0000 0015     while(1) {
+; 0000 0012     while(1) {
 _0x3:
-; 0000 0016         speed = PINC;
+; 0000 0013         speed = PINC;
 	IN   R4,19
 	CLR  R5
-; 0000 0017         OCR1AL = speed;
+; 0000 0014         OCR1AL = speed;
 	OUT  0x2A,R4
-; 0000 0018         PORTA = OCR1AL;
-	IN   R30,0x2A
-	OUT  0x1B,R30
-; 0000 0019     }
+; 0000 0015     }
 	RJMP _0x3
-; 0000 001A }
+; 0000 0016  }
 _0x6:
 	RJMP _0x6
 ; .FEND
+;
 
 	.CSEG
 ;RUNTIME LIBRARY

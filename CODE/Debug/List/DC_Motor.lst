@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.1.30  D:\ELE_2018\CODE\Debug\List\DC_Motor.asm Mon Apr 16 15:29:51 2018
+AVRASM ver. 2.1.30  D:\ELE_2018\CODE\Debug\List\DC_Motor.asm Mon Apr 23 15:10:09 2018
 
 D:\ELE_2018\CODE\Debug\List\DC_Motor.asm(1097): warning: Register r4 already defined by the .DEF directive
 D:\ELE_2018\CODE\Debug\List\DC_Motor.asm(1098): warning: Register r5 already defined by the .DEF directive
@@ -1199,13 +1199,13 @@ D:\ELE_2018\CODE\Debug\List\DC_Motor.asm(1098): warning: Register r5 already def
                  
                  	.CSEG
                  ;/*
-                 ; * MOTOR1.c
-                 ; * 모터를 정방향으로 회전시키기
-                 ; * Created: 2018-04-16 오후 12:23:59
+                 ; * MOTOR4.c
+                 ; *
+                 ; * Created: 2018-04-23 오후 01:24:52s
                  ; * Author: KHJ
                  ; */
                  ;
-                 ;#include <mega128.h>
+                 ; #include <mega128.h>
                  	#ifndef __SLEEP_DEFINED__
                  	#define __SLEEP_DEFINED__
                  	.EQU __se_bit=0x20
@@ -1217,54 +1217,46 @@ D:\ELE_2018\CODE\Debug\List\DC_Motor.asm(1098): warning: Register r5 already def
                  	.EQU __sm_adc_noise_red=0x08
                  	.SET power_ctrl_reg=mcucr
                  	#endif
-                 ;#include <delay.h>
-                 ;#define MOTOR PORTB
-                 ;unsigned int speed;
-                 ;void main(void) {
+                 ; #include <delay.h>
+                 ; #define MOTOR PORTB
+                 ; unsigned int speed;
+                 ; void main(void) {
                  ; 0000 000C void main(void) {
                  
                  	.CSEG
                  _main:
                  ; .FSTART _main
-                 ; 0000 000D     DDRA = 0xff;
-000064 efef      	LDI  R30,LOW(255)
-000065 bbea      	OUT  0x1A,R30
-                 ; 0000 000E     DDRB = 0xff;
-000066 bbe7      	OUT  0x17,R30
-                 ; 0000 000F     DDRC = 0x00;
-000067 e0e0      	LDI  R30,LOW(0)
-000068 bbe4      	OUT  0x14,R30
-                 ; 0000 0010     TCCR1A = 0b11000001;
-000069 ece1      	LDI  R30,LOW(193)
-00006a bdef      	OUT  0x2F,R30
-                 ; 0000 0011     TCCR1B = 0b00000101;
-00006b e0e5      	LDI  R30,LOW(5)
-00006c bdee      	OUT  0x2E,R30
-                 ; 0000 0012     TCNT1 = 0x0000;
-00006d e0e0      	LDI  R30,LOW(0)
-00006e e0f0      	LDI  R31,HIGH(0)
-00006f bdfd      	OUT  0x2C+1,R31
-000070 bdec      	OUT  0x2C,R30
-                 ; 0000 0013     SREG = 0x80;
-000071 e8e0      	LDI  R30,LOW(128)
-000072 bfef      	OUT  0x3F,R30
-                 ; 0000 0014 
-                 ; 0000 0015     while(1) {
+                 ; 0000 000D     DDRB = 0xf0;
+000064 efe0      	LDI  R30,LOW(240)
+000065 bbe7      	OUT  0x17,R30
+                 ; 0000 000E     DDRC = 0x00;
+000066 e0e0      	LDI  R30,LOW(0)
+000067 bbe4      	OUT  0x14,R30
+                 ; 0000 000F     TCCR1A = 0b10000001;
+000068 e8e1      	LDI  R30,LOW(129)
+000069 bdef      	OUT  0x2F,R30
+                 ; 0000 0010     TCCR1B = 0b00000101;
+00006a e0e5      	LDI  R30,LOW(5)
+00006b bdee      	OUT  0x2E,R30
+                 ; 0000 0011     TCNT1 = 0x0000;
+00006c e0e0      	LDI  R30,LOW(0)
+00006d e0f0      	LDI  R31,HIGH(0)
+00006e bdfd      	OUT  0x2C+1,R31
+00006f bdec      	OUT  0x2C,R30
+                 ; 0000 0012     while(1) {
                  _0x3:
-                 ; 0000 0016         speed = PINC;
-000073 b243      	IN   R4,19
-000074 2455      	CLR  R5
-                 ; 0000 0017         OCR1AL = speed;
-000075 bc4a      	OUT  0x2A,R4
-                 ; 0000 0018         PORTA = OCR1AL;
-000076 b5ea      	IN   R30,0x2A
-000077 bbeb      	OUT  0x1B,R30
-                 ; 0000 0019     }
-000078 cffa      	RJMP _0x3
-                 ; 0000 001A }
+                 ; 0000 0013         speed = PINC;
+000070 b243      	IN   R4,19
+000071 2455      	CLR  R5
+                 ; 0000 0014         OCR1AL = speed;
+000072 bc4a      	OUT  0x2A,R4
+                 ; 0000 0015     }
+000073 cffc      	RJMP _0x3
+                 ; 0000 0016  }
                  _0x6:
-000079 cfff      	RJMP _0x6
+000074 cfff      	RJMP _0x6
                  ; .FEND
+                 ;
                  
                  	.CSEG
                  ;RUNTIME LIBRARY
@@ -1292,7 +1284,7 @@ ATmega128 register use summary:
 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   2 r5 :   1 r6 :   0 r7 :   0 
 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 r13:   0 r14:   0 r15:   0 
 r16:   0 r17:   0 r18:   0 r19:   0 r20:   0 r21:   0 r22:   0 r23:   0 
-r24:   5 r25:   1 r26:   2 r27:   2 r28:   1 r29:   1 r30:  25 r31:   4 
+r24:   5 r25:   1 r26:   2 r27:   2 r28:   1 r29:   1 r30:  20 r31:   4 
 x  :   2 y  :   0 z  :   0 
 Registers used: 11 out of 35 (31.4%)
 
@@ -1307,10 +1299,10 @@ cbi   :   0 cbr   :   0 clc   :   0 clh   :   0 cli   :   1 cln   :   0
 clr   :   3 cls   :   0 clt   :   0 clv   :   0 clz   :   0 com   :   0 
 cp    :   0 cpc   :   0 cpi   :   0 cpse  :   0 dec   :   1 des   :   0 
 elpm  :   0 eor   :   0 fmul  :   0 fmuls :   0 fmulsu:   0 icall :   0 
-ijmp  :   0 in    :   2 inc   :   0 jmp   :  36 ld    :   0 ldd   :   0 
-ldi   :  18 lds   :   0 lpm   :   0 lsl   :   0 lsr   :   0 mov   :   0 
+ijmp  :   0 in    :   1 inc   :   0 jmp   :  36 ld    :   0 ldd   :   0 
+ldi   :  17 lds   :   0 lpm   :   0 lsl   :   0 lsr   :   0 mov   :   0 
 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 neg   :   0 nop   :   0 
-or    :   0 ori   :   0 out   :  16 pop   :   0 push  :   0 rcall :   0 
+or    :   0 ori   :   0 out   :  13 pop   :   0 push  :   0 rcall :   0 
 ret   :   0 reti  :   0 rjmp  :   2 rol   :   0 ror   :   0 sbc   :   0 
 sbci  :   0 sbi   :   0 sbic  :   0 sbis  :   0 sbiw  :   1 sbr   :   0 
 sbrc  :   0 sbrs  :   0 sec   :   0 seh   :   0 sei   :   0 sen   :   0 
@@ -1322,7 +1314,7 @@ Instructions used: 12 out of 117 (10.3%)
 ATmega128 memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x0000f4    244      0    244  131072   0.2%
+[.cseg] 0x000000 0x0000ea    234      0    234  131072   0.2%
 [.dseg] 0x000100 0x000500      0      0      0    4096   0.0%
 [.eseg] 0x000000 0x000000      0      0      0    4096   0.0%
 

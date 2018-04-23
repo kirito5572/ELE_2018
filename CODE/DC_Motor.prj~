@@ -6,7 +6,7 @@ CV=3.32a Evaluation
 A=Freeware, for evaluation andC=
 D=2018-04-16 ¿ÀÈÄ 12:23:59
 Files=1
-OpenedFiles=2
+OpenedFiles=5
 AllowDisplayFunctionCallTree=1
 CleanUp=2
 DebugOutputListFilesDirectory=Debug\List
@@ -17,12 +17,18 @@ OutputListFilesDirectory=Release\List
 OutputObjectFilesDirectory=Release
 OutputExecutableFilesDirectory=Release\Exe
 OutputLinkerFilesDirectory=Release\Link
-F1=Motor2.c
-ActiveTab=2
+ActiveTab=5
 OF1=MOTOR1.c
 TimeStamp1=1284531016
 OF2=Motor2.c
 TimeStamp2=1284531340
+OF3=Motor3.c
+TimeStamp3=1284991759
+F1=Motor5.c
+OF4=Motor4.c
+TimeStamp4=1284993047
+OF5=Motor5.c
+TimeStamp5=1284994599
 non-commercial use only
 [CompilerDebug]
 Chip=ATmega128
@@ -128,8 +134,8 @@ UseEEPROMLocation0=1
 DisplayCodeSizeError=0
 RebuildAll=0
 LinkageInformationPresent=1
-COFFileTimeStamp=1284531341
-Build=9
+COFFileTimeStamp=1284994926
+Build=50
 GlobalVarAddr=1280
 EEPROMVarAddr=0
 [DefinedSymbolsDebug]
@@ -239,7 +245,7 @@ DisplayCodeSizeError=0
 RebuildAll=1
 LinkageInformationPresent=0
 COFFileTimeStamp=-1
-Build=9
+Build=50
 IncludePath0=C:\cvavreval\inc
 IncludePath1=
 IncludePath2=
@@ -502,8 +508,8 @@ L13=Enhanced function parameters passing: Mode 2
 L14=Automatic register allocation: Yes
 L15=Smart register allocation: Yes
 L16=
-L17=Build: 8
-L18=1110 line(s) compiled
+L17=Build: 50
+L18=1118 line(s) compiled
 L19=No errors
 L20=No warnings
 L21=
@@ -522,61 +528,38 @@ L33=Heap size: 0 byte(s)
 L34=
 L35=EEPROM usage: 0 byte(s), 0.0% of EEPROM
 Lines=37
-L36=Program size: 127 words (254 bytes), 0.2% of FLASH
-L37=6 words (12 bytes), 4.5% reduced by Code Compression
+L36=Program size: 176 words (352 bytes), 0.3% of FLASH
+L37=0 words (0 bytes), 0.0% reduced by Code Compression
 [BuildInfoAssembler]
 Lines=12
 L1=AVRASM: AVR macro assembler 2.1.30 (build 592 Nov  7 2008 12:38:17)
 L2=Copyright (C) 1995-2008 ATMEL Corporation
 L3=
-L4=D:\ELE_2018\CODE\Debug\List\DC_Motor.asm(1271): No EEPROM data, deleting D:\ELE_2018\CODE\Debug\Exe\DC_Motor.eep
+L4=D:\ELE_2018\CODE\Debug\List\DC_Motor.asm(1352): No EEPROM data, deleting D:\ELE_2018\CODE\Debug\Exe\DC_Motor.eep
 L5=
 L6=ATmega128 memory use summary [bytes]:
 L7=Segment   Begin    End      Code   Data   Used    Size   Use%
 L8=---------------------------------------------------------------
-L9=[.cseg] 0x000000 0x0000fe    254      0    254  131072   0.2%
+L9=[.cseg] 0x000000 0x000160    342     10    352  131072   0.3%
 L10=[.dseg] 0x000100 0x000500      0      0      0    4096   0.0%
 L11=[.eseg] 0x000000 0x000000      0      0      0    4096   0.0%
 L12=
-[HeadersList]
-Files=1
-F1=D:\ELE_2018\CODE\Motor2.c
-[Header1]
-Files=3
-F1=C:\cvavreval\inc\mega128.h
-F2=C:\cvavreval\inc\mega128_bits.h
-F3=C:\cvavreval\inc\delay.h
 [Bookmarks0]
-Row=9
-Column=17
+Row=0
+Column=0
 ScrollPosX=0
 ScrollPosY=0
-TimeStamp=1284535507
+TimeStamp=1284994650
 [BookmarksFoldedCode]
-Files=2
+Files=5
 F1=Motor2.c
 F2=MOTOR1.c
+F3=Motor3.c
+F4=Motor5.c
+F5=Motor4.c
 [Bookmarks1]
 TimeStamp=1284531340
-Row=16
-Column=66
-ScrollPosX=0
-ScrollPosY=0
-BK0=-1
-BK1=-1
-BK2=-1
-BK3=-1
-BK4=-1
-BK5=-1
-BK6=-1
-BK7=-1
-BK8=-1
-BK9=-1
-[FoldedCode1]
-Blocks=0
-[Bookmarks2]
-TimeStamp=1284531016
-Row=0
+Row=9
 Column=0
 ScrollPosX=0
 ScrollPosY=0
@@ -590,5 +573,85 @@ BK6=-1
 BK7=-1
 BK8=-1
 BK9=-1
+[Bookmarks2]
+TimeStamp=1284531016
+Row=5
+Column=17
+ScrollPosX=0
+ScrollPosY=0
+BK0=-1
+BK1=-1
+BK2=-1
+BK3=-1
+BK4=-1
+BK5=-1
+BK6=-1
+BK7=-1
+BK8=-1
+BK9=-1
+[Bookmarks3]
+TimeStamp=1284991759
+Row=16
+Column=6
+ScrollPosX=0
+ScrollPosY=6
+BK0=-1
+BK1=-1
+BK2=-1
+BK3=-1
+BK4=-1
+BK5=-1
+BK6=-1
+BK7=-1
+BK8=-1
+BK9=-1
+[Bookmarks4]
+TimeStamp=1284994599
+Row=26
+Column=34
+ScrollPosX=0
+ScrollPosY=9
+BK0=-1
+BK1=-1
+BK2=-1
+BK3=-1
+BK4=-1
+BK5=-1
+BK6=-1
+BK7=-1
+BK8=-1
+BK9=-1
+[FoldedCode4]
+Blocks=0
+[Bookmarks5]
+TimeStamp=1284993047
+Row=17
+Column=4
+ScrollPosX=0
+ScrollPosY=4
+BK0=-1
+BK1=-1
+BK2=-1
+BK3=-1
+BK4=-1
+BK5=-1
+BK6=-1
+BK7=-1
+BK8=-1
+BK9=-1
+[FoldedCode5]
+Blocks=0
+[FoldedCode3]
+Blocks=0
+[FoldedCode1]
+Blocks=0
 [FoldedCode2]
 Blocks=0
+[HeadersList]
+Files=1
+F1=D:\ELE_2018\CODE\Motor5.c
+[Header1]
+Files=3
+F1=C:\cvavreval\inc\mega128.h
+F2=C:\cvavreval\inc\mega128_bits.h
+F3=C:\cvavreval\inc\delay.h

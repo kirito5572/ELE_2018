@@ -1,0 +1,38 @@
+/*
+ * MOTOR4.c
+ * 
+ * Created: 2018-04-23 ¿ÀÈÄ 01:24:52s
+ * Author: KHJ
+ */
+ 
+ #include <mega128.h>
+ #include <delay.h>
+ #define MOTOR PORTB
+ unsigned int speed;
+ void main(void) {
+    DDRB = 0xf0;
+    DDRC = 0x00;
+    TCCR1A = 0b10000001;
+    TCCR1B = 0b00000101;
+    TCNT1 = 0x0000;
+    while(1) {
+        if(PINC == 0b00000001)
+            speed = 0b00000001;
+        else if(PINC == 0b00000010)
+            speed = 0b00000010;
+        else if(PINC == 0b00000100)
+            speed = 0b00000100;
+        else if(PINC == 0b00001000)
+            speed = 0b00001000;
+        else if(PINC == 0b00010000)
+            speed = 0b00010000;
+        else if(PINC == 0b00100000)
+            speed = 0b00100000;
+        else if(PINC == 0b01000000)
+            speed = 0b01000000;
+        else if(PINC == 0b10000000)
+            speed = 0b10000000;            
+        OCR1AL = speed;    
+    }
+ }
+    
