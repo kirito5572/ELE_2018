@@ -25,7 +25,7 @@
         else if(PINC == 0b00000010 && speed != 0 && SWpass == 0x00 && SWnow == 0x02)
             speed = speed - 10;
         OCR1AL = speed;
-        SWpass = SWnow;
         PORTA = speed;
+        SWpass = SWnow;
     }
  }  
