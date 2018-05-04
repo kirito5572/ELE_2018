@@ -1,0 +1,14 @@
+/*
+ * STEP_Motor1.c
+ * 
+ * Created: 2018-04-24 오후 01:53:26
+ * Author: KHJ
+ */
+
+#include <mega128.h>
+#include <delay.h>
+#define MOTOR PORTE
+void main(void) {
+
+CCW 90도 185 count 10 2.5 count 20 7.5
+CW 90도 183 count 10 3.5 count 20 8.5
