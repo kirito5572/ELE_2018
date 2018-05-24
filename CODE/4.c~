@@ -1,0 +1,12 @@
+#include <mega128.h>
+#include <delay.h>
+#define LED PORTA
+ void main(void) {
+    unsigned char Nibble = 0x0f;
+    DDRA = 0xff;
+    LED = Nibble;
+    while(1) {
+        LED = ~LED;
+        delay_ms(500);
+    }
+ }     

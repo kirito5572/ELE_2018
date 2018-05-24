@@ -38,9 +38,6 @@
   <ItemGroup>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SWITCH4.c">
-      <SubType>compile</SubType>
-    </Compile>
   </ItemGroup>
   <Import Project="$(AVRSTUDIO_EXE_PATH)\\vs\\CV.targets" />
 </Project>

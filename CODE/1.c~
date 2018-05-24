@@ -1,0 +1,17 @@
+#include <mega128.h>
+#include <delay.h>
+#define LED PORTA
+ void main(void) {
+    DDRA = 0xff;
+    unsigned char Bits = 0xfe;
+    while(1) {
+        LED = Bits;
+        Bits <<= 1;
+        Bits |= 0x01;
+        if(Bits == 0xff) {
+            Bits = 0xfe;
+        }
+        delay_ms(500);
+    }
+ }
+        

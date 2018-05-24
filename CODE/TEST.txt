@@ -1,0 +1,13 @@
+COM1 12
+COM2 9
+COM3 8
+COM4 6
+
+A  11
+B  7
+C  4
+D  2
+E  1
+F  10
+G  5
+DP 3

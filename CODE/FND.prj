@@ -607,7 +607,7 @@ Row=0
 Column=0
 ScrollPosX=0
 ScrollPosY=0
-TimeStamp=1284078659
+TimeStamp=1286103649
 [Bookmarks4]
 TimeStamp=1283684937
 Row=1
@@ -632,10 +632,6 @@ Files=3
 F1=C:\cvavreval\inc\mega128.h
 F2=C:\cvavreval\inc\mega128_bits.h
 F3=C:\cvavreval\inc\delay.h
-[FoldedCode1]
-Blocks=0
-[FoldedCode2]
-Blocks=0
 [Bookmarks5]
 TimeStamp=1284072103
 Row=8
@@ -652,8 +648,6 @@ BK6=-1
 BK7=-1
 BK8=-1
 BK9=-1
-[FoldedCode5]
-Blocks=0
 [Bookmarks6]
 TimeStamp=1284071845
 Row=6
@@ -670,6 +664,12 @@ BK6=-1
 BK7=-1
 BK8=-1
 BK9=-1
+[FoldedCode1]
+Blocks=0
+[FoldedCode2]
+Blocks=0
+[FoldedCode5]
+Blocks=0
 [FoldedCode6]
 Blocks=0
 [FoldedCode4]
