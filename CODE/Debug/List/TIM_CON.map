@@ -1,0 +1,23 @@
+RAM Allocation [bytes]
+Variable                                                                          Address   Size
+------------------------------------------------------------------------------------------------
+
+EEPROM Allocation [bytes]
+Variable                                                                          Address   Size
+------------------------------------------------------------------------------------------------
+
+Register Allocation
+Variable                                                                          Register  Size
+------------------------------------------------------------------------------------------------
+count1                                                                            R5           1
+count2                                                                            R4           1
+FNDcount1                                                                         R7           1
+FNDcount2                                                                         R6           1
+
+FLASH Allocation [words]
+Function                                                                          Address   Size
+------------------------------------------------------------------------------------------------
+main                                                                              0x0007C     18
+overflow2                                                                         0x0008E     14
+overflow                                                                          0x0009C     17
+FND                                                                               0x000AD     27

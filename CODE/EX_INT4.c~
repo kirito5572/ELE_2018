@@ -1,0 +1,38 @@
+/*
+ * EX_INT4.c
+ *
+ * Created: 2018-06-04 ¿ÀÈÄ 12:37:16
+ * Author: KHJ
+ */
+
+#include <mega128.h>
+#include <delay.h>
+int speed;
+void FND(void);
+void main(void) {
+    DDRB = 0xff;
+    EICRB = 0x0a;
+    EIMSK = 0x30;
+    EIFR = 0x00;
+    SREG = 0x80;
+    TCCR1A = 0x81;
+    TCCR1B = 0x05;
+    TCNT1 = 0x0000;
+    while (1) {
+        OCR1AL = speed;
+    }
+}
+interrupt [EXT_INT4] void speedup (void)
+{
+     speed+=10;
+     if(speed > 255) {
+         speed = 250;
+     }
+}
+interrupt [EXT_INT5] void speeddown (void)
+{
+     speed-=10;
+     if(speed < 0) {
+         speed = 0;
+     }
+}
