@@ -1093,6 +1093,14 @@ __DELAY_USW_LOOP:
 	ADD  R31,R0
 	.ENDM
 
+;NAME DEFINITIONS FOR GLOBAL VARIABLES ALLOCATED TO REGISTERS
+	.DEF _count=R4
+	.DEF _count_msb=R5
+	.DEF _ADC0L=R6
+	.DEF _ADC0L_msb=R7
+	.DEF _ADC1L=R8
+	.DEF _ADC1L_msb=R9
+
 	.CSEG
 	.ORG 0x00
 
@@ -1193,8 +1201,8 @@ __CLEAR_SRAM:
 ; *
 ; * Created: 2018-06-12 ¿ÀÈÄ 02:06:41
 ; * Author: KHJ
-; */
-;long count;
+;*/
+;int count,ADC0L,ADC1L;
 ;#include <mega128.h>
 	#ifndef __SLEEP_DEFINED__
 	#define __SLEEP_DEFINED__
@@ -1222,33 +1230,45 @@ _main:
 ; 0000 000D     DDRF = 0x00;
 	LDI  R30,LOW(0)
 	STS  97,R30
-; 0000 000E     ADMUX = 0x10;
-	LDI  R30,LOW(16)
-	OUT  0x7,R30
-; 0000 000F     ADCSRA = 0x8f;
+; 0000 000E     ADCSRA = 0x8f;
 	LDI  R30,LOW(143)
 	OUT  0x6,R30
-; 0000 0010     SREG = 0x80;
+; 0000 000F     SREG = 0x80;
 	LDI  R30,LOW(128)
 	OUT  0x3F,R30
-; 0000 0011     do {
+; 0000 0010     do {
 _0x4:
+; 0000 0011         ADMUX = 0x30;
+	LDI  R30,LOW(48)
+	RCALL SUBOPT_0x0
 ; 0000 0012         ADCSRA = 0xcf;
+; 0000 0013         delay_ms(2);
+; 0000 0014         ADCSRA = 0x8f;
+; 0000 0015         ADMUX = 0x20;
+	LDI  R30,LOW(32)
+	RCALL SUBOPT_0x0
+; 0000 0016         ADCSRA = 0xcf;
+; 0000 0017         delay_ms(2);
+; 0000 0018         ADCSRA = 0x8f;
+; 0000 0019         ADMUX = 0x21;
+	LDI  R30,LOW(33)
+	OUT  0x7,R30
+; 0000 001A         ADCSRA = 0xcf;
 	LDI  R30,LOW(207)
 	OUT  0x6,R30
-; 0000 0013         delay_ms(5);
-	LDI  R26,LOW(5)
+; 0000 001B         delay_ms(2);
+	LDI  R26,LOW(2)
 	LDI  R27,0
 	RCALL _delay_ms
-; 0000 0014     }
-; 0000 0015     while (1);
+; 0000 001C     }
+; 0000 001D     while (1);
 	RJMP _0x4
-; 0000 0016 }
+; 0000 001E }
 _0x6:
 	RJMP _0x6
 ; .FEND
 ;interrupt [ADC_INT] void ADCinter(void) {
-; 0000 0017 interrupt [22] void ADCinter(void) {
+; 0000 001F interrupt [22] void ADCinter(void) {
 _ADCinter:
 ; .FSTART _ADCinter
 	ST   -Y,R0
@@ -1264,80 +1284,105 @@ _ADCinter:
 	ST   -Y,R31
 	IN   R30,SREG
 	ST   -Y,R30
-; 0000 0018     unsigned char st,nd,rd;
-; 0000 0019     count = ADCW;
+; 0000 0020     unsigned char st,nd,rd;
+; 0000 0021     if(ADMUX == 0x20) {
 	RCALL __SAVELOCR4
 ;	st -> R17
 ;	nd -> R16
 ;	rd -> R19
-	IN   R30,0x4
-	IN   R31,0x4+1
-	RCALL SUBOPT_0x0
-; 0000 001A     if(ADCH.1 == 1) {
-	SBIS 0x5,1
-	RJMP _0x7
-; 0000 001B         count = ((long)(ADCW*-1)+1)%256;
-	IN   R30,0x4
-	IN   R31,0x4+1
-	LDI  R26,LOW(65535)
-	LDI  R27,HIGH(65535)
-	RCALL __MULW12U
-	CLR  R22
-	CLR  R23
-	__ADDD1N 1
-	__GETD2N 0xFF
-	RCALL __MANDD12
-	STS  _count,R30
-	STS  _count+1,R31
-	STS  _count+2,R22
-	STS  _count+3,R23
-; 0000 001C         rd = (count/100)%10;
-	RCALL SUBOPT_0x1
-	RCALL SUBOPT_0x2
-; 0000 001D         nd = (count/10)%10;
-; 0000 001E         st = count%10;
-; 0000 001F         PORTD = 0xe0;
-	LDI  R30,LOW(224)
-	RJMP _0x9
-; 0000 0020         delay_ms(2);
-; 0000 0021     }
-; 0000 0022     else{
+	IN   R30,0x7
+	CPI  R30,LOW(0x20)
+	BRNE _0x7
+; 0000 0022         ADC0L = ADCH;
+	IN   R6,5
+	CLR  R7
+; 0000 0023     }
+; 0000 0024     else if(ADMUX == 0x21) {
+	RJMP _0x8
 _0x7:
-; 0000 0023         count = ADCW%256;
-	IN   R30,0x4
-	IN   R31,0x4+1
-	ANDI R31,HIGH(0xFF)
-	RCALL SUBOPT_0x0
-; 0000 0024         rd = (count/100)%10;
-	RCALL SUBOPT_0x1
-	RCALL SUBOPT_0x2
-; 0000 0025         nd = (count/10)%10;
-; 0000 0026         st = count%10;
-; 0000 0027         PORTD = 0xef;
-	LDI  R30,LOW(239)
+	IN   R30,0x7
+	CPI  R30,LOW(0x21)
+	BRNE _0x9
+; 0000 0025         ADC1L = ADCH;
+	IN   R8,5
+	CLR  R9
+; 0000 0026     }
+; 0000 0027     else if(ADMUX == 0x30) {
+	RJMP _0xA
 _0x9:
+	IN   R30,0x7
+	CPI  R30,LOW(0x30)
+	BRNE _0xB
+; 0000 0028         if(ADC0L < ADC1L) {
+	__CPWRR 6,7,8,9
+	BRGE _0xC
+; 0000 0029             count = ((~ADCH)+1);
+	IN   R30,0x5
+	LDI  R31,0
+	COM  R30
+	COM  R31
+	ADIW R30,1
+	MOVW R4,R30
+; 0000 002A             PORTD = 0xe0;
+	LDI  R30,LOW(224)
+	RJMP _0xF
+; 0000 002B             delay_ms(2);
+; 0000 002C         }
+; 0000 002D         else{
+_0xC:
+; 0000 002E             count = ADCH;
+	IN   R4,5
+	CLR  R5
+; 0000 002F             PORTD = 0xef;
+	LDI  R30,LOW(239)
+_0xF:
 	OUT  0x12,R30
-; 0000 0028         delay_ms(2);
+; 0000 0030             delay_ms(2);
 	LDI  R26,LOW(2)
 	LDI  R27,0
 	RCALL _delay_ms
-; 0000 0029     }
-; 0000 002A     PORTD = 0xd0 | rd;
+; 0000 0031         }
+; 0000 0032     }
+; 0000 0033     else {
+_0xB:
+; 0000 0034 
+; 0000 0035     }
+_0xA:
+_0x8:
+; 0000 0036     rd = (count/100)%10;
+	MOVW R26,R4
+	LDI  R30,LOW(100)
+	LDI  R31,HIGH(100)
+	RCALL SUBOPT_0x1
+	MOV  R19,R30
+; 0000 0037     nd = (count/10)%10;
+	MOVW R26,R4
+	LDI  R30,LOW(10)
+	LDI  R31,HIGH(10)
+	RCALL SUBOPT_0x1
+	MOV  R16,R30
+; 0000 0038     st = count%10;
+	MOVW R26,R4
+	LDI  R30,LOW(10)
+	LDI  R31,HIGH(10)
+	RCALL __MODW21
+	MOV  R17,R30
+; 0000 0039     PORTD = 0xd0 | rd;
 	MOV  R30,R19
 	ORI  R30,LOW(0xD0)
-	RCALL SUBOPT_0x3
-; 0000 002B     delay_ms(2);
-; 0000 002C     PORTD = 0xb0 | nd;
+	RCALL SUBOPT_0x2
+; 0000 003A     delay_ms(2);
+; 0000 003B     PORTD = 0xb0 | nd;
 	MOV  R30,R16
 	ORI  R30,LOW(0xB0)
-	RCALL SUBOPT_0x3
-; 0000 002D     delay_ms(2);
-; 0000 002E     PORTD = 0x70 | st;
+	RCALL SUBOPT_0x2
+; 0000 003C     delay_ms(2);
+; 0000 003D     PORTD = 0x70 | st;
 	MOV  R30,R17
 	ORI  R30,LOW(0x70)
-	RCALL SUBOPT_0x3
-; 0000 002F     delay_ms(2);
-; 0000 0030 }
+	RCALL SUBOPT_0x2
+; 0000 003E     delay_ms(2);
+; 0000 003F }
 	RCALL __LOADLOCR4
 	ADIW R28,4
 	LD   R30,Y+
@@ -1356,54 +1401,30 @@ _0x9:
 	RETI
 ; .FEND
 
-	.DSEG
-_count:
-	.BYTE 0x4
-
 	.CSEG
-;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:7 WORDS
+;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:5 WORDS
 SUBOPT_0x0:
-	CLR  R22
-	CLR  R23
-	STS  _count,R30
-	STS  _count+1,R31
-	STS  _count+2,R22
-	STS  _count+3,R23
+	OUT  0x7,R30
+	LDI  R30,LOW(207)
+	OUT  0x6,R30
+	LDI  R26,LOW(2)
+	LDI  R27,0
+	RCALL _delay_ms
+	LDI  R30,LOW(143)
+	OUT  0x6,R30
 	RET
 
-;OPTIMIZER ADDED SUBROUTINE, CALLED 6 TIMES, CODE SIZE REDUCTION:33 WORDS
+;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:2 WORDS
 SUBOPT_0x1:
-	LDS  R26,_count
-	LDS  R27,_count+1
-	LDS  R24,_count+2
-	LDS  R25,_count+3
-	RET
-
-;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:31 WORDS
-SUBOPT_0x2:
-	__GETD1N 0x64
-	RCALL __DIVD21
+	RCALL __DIVW21
 	MOVW R26,R30
-	MOVW R24,R22
-	__GETD1N 0xA
-	RCALL __MODD21
-	MOV  R19,R30
-	RCALL SUBOPT_0x1
-	__GETD1N 0xA
-	RCALL __DIVD21
-	MOVW R26,R30
-	MOVW R24,R22
-	__GETD1N 0xA
-	RCALL __MODD21
-	MOV  R16,R30
-	RCALL SUBOPT_0x1
-	__GETD1N 0xA
-	RCALL __MODD21
-	MOV  R17,R30
+	LDI  R30,LOW(10)
+	LDI  R31,HIGH(10)
+	RCALL __MODW21
 	RET
 
 ;OPTIMIZER ADDED SUBROUTINE, CALLED 3 TIMES, CODE SIZE REDUCTION:4 WORDS
-SUBOPT_0x3:
+SUBOPT_0x2:
 	OUT  0x12,R30
 	LDI  R26,LOW(2)
 	LDI  R27,0
@@ -1430,132 +1451,78 @@ __LOADLOCR2:
 	LD   R16,Y
 	RET
 
-__ANEGD1:
-	COM  R31
-	COM  R22
-	COM  R23
+__ANEGW1:
+	NEG  R31
 	NEG  R30
-	SBCI R31,-1
-	SBCI R22,-1
-	SBCI R23,-1
+	SBCI R31,0
 	RET
 
-__ANEGD2:
-	COM  R27
-	COM  R24
-	COM  R25
-	NEG  R26
-	SBCI R27,-1
-	SBCI R24,-1
-	SBCI R25,-1
-	RET
-
-__MULW12U:
-	MUL  R31,R26
-	MOV  R31,R0
-	MUL  R30,R27
-	ADD  R31,R0
-	MUL  R30,R26
-	MOV  R30,R0
-	ADD  R31,R1
-	RET
-
-__DIVD21U:
-	PUSH R19
-	PUSH R20
-	PUSH R21
+__DIVW21U:
 	CLR  R0
 	CLR  R1
-	MOVW R20,R0
-	LDI  R19,32
-__DIVD21U1:
+	LDI  R25,16
+__DIVW21U1:
 	LSL  R26
 	ROL  R27
-	ROL  R24
-	ROL  R25
 	ROL  R0
 	ROL  R1
-	ROL  R20
-	ROL  R21
 	SUB  R0,R30
 	SBC  R1,R31
-	SBC  R20,R22
-	SBC  R21,R23
-	BRCC __DIVD21U2
+	BRCC __DIVW21U2
 	ADD  R0,R30
 	ADC  R1,R31
-	ADC  R20,R22
-	ADC  R21,R23
-	RJMP __DIVD21U3
-__DIVD21U2:
+	RJMP __DIVW21U3
+__DIVW21U2:
 	SBR  R26,1
-__DIVD21U3:
-	DEC  R19
-	BRNE __DIVD21U1
+__DIVW21U3:
+	DEC  R25
+	BRNE __DIVW21U1
 	MOVW R30,R26
-	MOVW R22,R24
 	MOVW R26,R0
-	MOVW R24,R20
-	POP  R21
-	POP  R20
-	POP  R19
 	RET
 
-__DIVD21:
-	RCALL __CHKSIGND
-	RCALL __DIVD21U
-	BRTC __DIVD211
-	RCALL __ANEGD1
-__DIVD211:
+__DIVW21:
+	RCALL __CHKSIGNW
+	RCALL __DIVW21U
+	BRTC __DIVW211
+	RCALL __ANEGW1
+__DIVW211:
 	RET
 
-__MODD21:
+__MODW21:
 	CLT
-	SBRS R25,7
-	RJMP __MODD211
-	RCALL __ANEGD2
+	SBRS R27,7
+	RJMP __MODW211
+	NEG  R27
+	NEG  R26
+	SBCI R27,0
 	SET
-__MODD211:
-	SBRC R23,7
-	RCALL __ANEGD1
-	RCALL __DIVD21U
+__MODW211:
+	SBRC R31,7
+	RCALL __ANEGW1
+	RCALL __DIVW21U
 	MOVW R30,R26
-	MOVW R22,R24
-	BRTC __MODD212
-	RCALL __ANEGD1
-__MODD212:
+	BRTC __MODW212
+	RCALL __ANEGW1
+__MODW212:
 	RET
 
-__MANDD12:
+__CHKSIGNW:
 	CLT
-	SBRS R23,7
-	RJMP __MANDD121
-	RCALL __ANEGD1
+	SBRS R31,7
+	RJMP __CHKSW1
+	RCALL __ANEGW1
 	SET
-__MANDD121:
-	AND  R30,R26
-	AND  R31,R27
-	AND  R22,R24
-	AND  R23,R25
-	BRTC __MANDD122
-	RCALL __ANEGD1
-__MANDD122:
-	RET
-
-__CHKSIGND:
-	CLT
-	SBRS R23,7
-	RJMP __CHKSD1
-	RCALL __ANEGD1
-	SET
-__CHKSD1:
-	SBRS R25,7
-	RJMP __CHKSD2
-	RCALL __ANEGD2
+__CHKSW1:
+	SBRS R27,7
+	RJMP __CHKSW2
+	NEG  R27
+	NEG  R26
+	SBCI R27,0
 	BLD  R0,0
 	INC  R0
 	BST  R0,0
-__CHKSD2:
+__CHKSW2:
 	RET
 
 _delay_ms:
