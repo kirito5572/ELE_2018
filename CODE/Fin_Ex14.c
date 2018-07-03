@@ -1,0 +1,15 @@
+#include <mega128.h>
+#include <delay.h>
+void main() {
+    DDRB = 0xff;
+    while(1) {
+        PORTB = 0x01;
+        delay_ms(20);
+        PORTB = 0x04;
+        delay_ms(20);
+        PORTB = 0x02;
+        delay_ms(20);
+        PORTB = 0x08;
+        delay_ms(20);
+    }
+}

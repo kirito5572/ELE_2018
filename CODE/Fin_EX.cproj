@@ -38,7 +38,7 @@
   <ItemGroup>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Fin_Ex10.c">
+    <Compile Include="Fin_Ex23.c">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>

@@ -1093,10 +1093,6 @@ __DELAY_USW_LOOP:
 	ADD  R31,R0
 	.ENDM
 
-;NAME DEFINITIONS FOR GLOBAL VARIABLES ALLOCATED TO REGISTERS
-	.DEF _count=R4
-	.DEF _count_msb=R5
-
 	.CSEG
 	.ORG 0x00
 
@@ -1205,153 +1201,83 @@ __CLEAR_SRAM:
 	.SET power_ctrl_reg=mcucr
 	#endif
 ;#include <delay.h>
-;unsigned int count;
-;void FND();
+;
+;unsigned int ADC(unsigned char);
 ;void main() {
 ; 0000 0005 void main() {
 
 	.CSEG
 _main:
 ; .FSTART _main
-; 0000 0006     DDRC = 0x00;
-	LDI  R30,LOW(0)
-	OUT  0x14,R30
-; 0000 0007     DDRD = 0xff;
+; 0000 0006     DDRB = 0xff;
 	LDI  R30,LOW(255)
-	OUT  0x11,R30
-; 0000 0008     while(1) {
+	OUT  0x17,R30
+; 0000 0007     DDRF = 0x00;
+	LDI  R30,LOW(0)
+	STS  97,R30
+; 0000 0008     PORTB = 0x00;
+	OUT  0x18,R30
+; 0000 0009     ADCW = 0x0000;
+	LDI  R30,LOW(0)
+	LDI  R31,HIGH(0)
+	OUT  0x4+1,R31
+	OUT  0x4,R30
+; 0000 000A     TCCR0 = 0x67;
+	LDI  R30,LOW(103)
+	OUT  0x33,R30
+; 0000 000B     TIMSK = 0x01;
+	LDI  R30,LOW(1)
+	OUT  0x37,R30
+; 0000 000C     while(1) {
 _0x3:
-; 0000 0009         FND();
-	RCALL _FND
-; 0000 000A         if(PINC!= 0x00) {
-	IN   R30,0x13
-	CPI  R30,0
-	BREQ _0x6
-; 0000 000B             while(1) {
-_0x7:
-; 0000 000C                 FND();
-	RCALL _FND
-; 0000 000D                 if(PINC == 0x00) {
-	IN   R30,0x13
-	CPI  R30,0
-	BRNE _0xA
-; 0000 000E                     count++;
-	MOVW R30,R4
-	ADIW R30,1
-	MOVW R4,R30
-; 0000 000F                     break;
-	RJMP _0x9
-; 0000 0010                 }
-; 0000 0011             }
-_0xA:
-	RJMP _0x7
-_0x9:
-; 0000 0012         }
-; 0000 0013     }
-_0x6:
-	RJMP _0x3
-; 0000 0014 }
-_0xB:
-	RJMP _0xB
-; .FEND
-;void FND() {
-; 0000 0015 void FND() {
-_FND:
-; .FSTART _FND
-; 0000 0016     unsigned char st,nd,rd,th;
-; 0000 0017     th = (count/1000) %10;
-	RCALL __SAVELOCR4
-;	st -> R17
-;	nd -> R16
-;	rd -> R19
-;	th -> R18
-	MOVW R26,R4
-	LDI  R30,LOW(1000)
-	LDI  R31,HIGH(1000)
-	RCALL SUBOPT_0x0
-	MOV  R18,R30
-; 0000 0018     rd = (count/100) %10;
-	MOVW R26,R4
-	LDI  R30,LOW(100)
-	LDI  R31,HIGH(100)
-	RCALL SUBOPT_0x0
-	MOV  R19,R30
-; 0000 0019     nd = (count/10) %10;
-	MOVW R26,R4
-	LDI  R30,LOW(10)
-	LDI  R31,HIGH(10)
-	RCALL SUBOPT_0x0
-	MOV  R16,R30
-; 0000 001A     st = count %10;
-	MOVW R26,R4
-	LDI  R30,LOW(10)
-	LDI  R31,HIGH(10)
-	RCALL __MODW21U
-	MOV  R17,R30
-; 0000 001B     PORTD = 0xe0 | th;
-	MOV  R30,R18
-	ORI  R30,LOW(0xE0)
-	RCALL SUBOPT_0x1
-; 0000 001C     delay_ms(2);
-; 0000 001D     PORTD = 0xd0 | rd;
-	MOV  R30,R19
-	ORI  R30,LOW(0xD0)
-	RCALL SUBOPT_0x1
-; 0000 001E     delay_ms(2);
-; 0000 001F     PORTD = 0xb0 | nd;
-	MOV  R30,R16
-	ORI  R30,LOW(0xB0)
-	RCALL SUBOPT_0x1
-; 0000 0020     delay_ms(2);
-; 0000 0021     PORTD = 0x70 | st;
-	MOV  R30,R17
-	ORI  R30,LOW(0x70)
-	RCALL SUBOPT_0x1
-; 0000 0022     delay_ms(2);
-; 0000 0023 }
-	RCALL __LOADLOCR4
-	ADIW R28,4
-	RET
-; .FEND
-
-	.CSEG
-;OPTIMIZER ADDED SUBROUTINE, CALLED 3 TIMES, CODE SIZE REDUCTION:6 WORDS
-SUBOPT_0x0:
-	RCALL __DIVW21U
+; 0000 000D         OCR0 = (ADC(0x8f)/10);
+	LDI  R26,LOW(143)
+	RCALL _ADC
 	MOVW R26,R30
 	LDI  R30,LOW(10)
 	LDI  R31,HIGH(10)
-	RCALL __MODW21U
-	RET
-
-;OPTIMIZER ADDED SUBROUTINE, CALLED 4 TIMES, CODE SIZE REDUCTION:7 WORDS
-SUBOPT_0x1:
-	OUT  0x12,R30
-	LDI  R26,LOW(2)
+	RCALL __DIVW21U
+	OUT  0x31,R30
+; 0000 000E         delay_ms(20);
+	LDI  R26,LOW(20)
 	LDI  R27,0
-	RJMP _delay_ms
+	RCALL _delay_ms
+; 0000 000F     }
+	RJMP _0x3
+; 0000 0010 }
+_0x6:
+	RJMP _0x6
+; .FEND
+;unsigned int ADC(unsigned char ADCS) {
+; 0000 0011 unsigned int ADC(unsigned char ADCS) {
+_ADC:
+; .FSTART _ADC
+; 0000 0012     ADMUX = 0x00;
+	ST   -Y,R17
+	MOV  R17,R26
+;	ADCS -> R17
+	LDI  R30,LOW(0)
+	OUT  0x7,R30
+; 0000 0013     ADCSRA = ADCS;
+	OUT  0x6,R17
+; 0000 0014     ADCSRA |= 0x40; //(1<<ADSC)
+	SBI  0x6,6
+; 0000 0015     delay_us(10);
+	__DELAY_USB 27
+; 0000 0016     while(ADIF == 0);
+; 0000 0017     return ADCW;
+	IN   R30,0x4
+	IN   R31,0x4+1
+	LD   R17,Y+
+	RET
+; 0000 0018 }
+; .FEND
+;
 
+	.CSEG
 ;RUNTIME LIBRARY
 
 	.CSEG
-__SAVELOCR4:
-	ST   -Y,R19
-__SAVELOCR3:
-	ST   -Y,R18
-__SAVELOCR2:
-	ST   -Y,R17
-	ST   -Y,R16
-	RET
-
-__LOADLOCR4:
-	LDD  R19,Y+3
-__LOADLOCR3:
-	LDD  R18,Y+2
-__LOADLOCR2:
-	LDD  R17,Y+1
-	LD   R16,Y
-	RET
-
 __DIVW21U:
 	CLR  R0
 	CLR  R1
@@ -1374,11 +1300,6 @@ __DIVW21U3:
 	BRNE __DIVW21U1
 	MOVW R30,R26
 	MOVW R26,R0
-	RET
-
-__MODW21U:
-	RCALL __DIVW21U
-	MOVW R30,R26
 	RET
 
 _delay_ms:

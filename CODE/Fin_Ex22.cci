@@ -1,0 +1,7 @@
+VERSION:3 SOURCE_TIMESTAMP:4CDA72CB
+NODE:I LEVEL:0 LINE:1 "C:\cvavreval\inc\mega128.h"
+NODE:I LEVEL:0 LINE:2 "C:\cvavreval\inc\delay.h"
+NODE:V LEVEL:0 LINE:3 "speed -> R4,R5"
+NODE:F LEVEL:0 LINE:4 "main(void)"
+NODE:F LEVEL:0 LINE:18 "inter4(void)"
+NODE:F LEVEL:0 LINE:24 "inter5(void)"

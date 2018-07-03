@@ -12,7 +12,7 @@
  void main(void) {
     unsigned char SWnow, SWpass = 0;
     DDRA = 0xff;
-    DDRB = 0xf0;s
+    DDRB = 0xf0;
     DDRC = 0x00;
     TCCR1A = 0b10000001;
     TCCR1B = 0b00001100;
