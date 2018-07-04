@@ -1093,6 +1093,9 @@ __DELAY_USW_LOOP:
 	ADD  R31,R0
 	.ENDM
 
+;NAME DEFINITIONS FOR GLOBAL VARIABLES ALLOCATED TO REGISTERS
+	.DEF _delay=R5
+
 	.CSEG
 	.ORG 0x00
 
@@ -1201,83 +1204,116 @@ __CLEAR_SRAM:
 	.SET power_ctrl_reg=mcucr
 	#endif
 ;#include <delay.h>
-;
-;unsigned int ADC(unsigned char);
+;unsigned char delay;
+;unsigned char ADC(unsigned char);
 ;void main() {
 ; 0000 0005 void main() {
 
 	.CSEG
 _main:
 ; .FSTART _main
-; 0000 0006     DDRB = 0xff;
-	LDI  R30,LOW(255)
+; 0000 0006     DDRB = 0x0f;
+	LDI  R30,LOW(15)
 	OUT  0x17,R30
-; 0000 0007     DDRF = 0x00;
-	LDI  R30,LOW(0)
+; 0000 0007     DDRF = 0xf0;
+	LDI  R30,LOW(240)
 	STS  97,R30
-; 0000 0008     PORTB = 0x00;
-	OUT  0x18,R30
-; 0000 0009     ADCW = 0x0000;
+; 0000 0008     ADCW = 0x0000;
 	LDI  R30,LOW(0)
 	LDI  R31,HIGH(0)
 	OUT  0x4+1,R31
 	OUT  0x4,R30
-; 0000 000A     TCCR0 = 0x67;
-	LDI  R30,LOW(103)
-	OUT  0x33,R30
-; 0000 000B     TIMSK = 0x01;
-	LDI  R30,LOW(1)
-	OUT  0x37,R30
-; 0000 000C     while(1) {
+; 0000 0009     while(1) {
 _0x3:
-; 0000 000D         OCR0 = (ADC(0x8f)/10);
+; 0000 000A         delay = (ADC(0x8f) / 6) + 10;
 	LDI  R26,LOW(143)
 	RCALL _ADC
+	LDI  R31,0
 	MOVW R26,R30
+	LDI  R30,LOW(6)
+	LDI  R31,HIGH(6)
+	RCALL __DIVW21
+	SUBI R30,-LOW(10)
+	MOV  R5,R30
+; 0000 000B         PORTB = 0x01;
+	LDI  R30,LOW(1)
+	RCALL SUBOPT_0x0
+; 0000 000C         delay_ms(delay);
+; 0000 000D         PORTB = 0x09;
+	LDI  R30,LOW(9)
+	RCALL SUBOPT_0x0
+; 0000 000E         delay_ms(delay);
+; 0000 000F         PORTB = 0x04;
+	LDI  R30,LOW(4)
+	RCALL SUBOPT_0x0
+; 0000 0010         delay_ms(delay);
+; 0000 0011         PORTB = 0x05;
+	LDI  R30,LOW(5)
+	RCALL SUBOPT_0x0
+; 0000 0012         delay_ms(delay);
+; 0000 0013         PORTB = 0x02;
+	LDI  R30,LOW(2)
+	RCALL SUBOPT_0x0
+; 0000 0014         delay_ms(delay);
+; 0000 0015         PORTB = 0x06;
+	LDI  R30,LOW(6)
+	RCALL SUBOPT_0x0
+; 0000 0016         delay_ms(delay);
+; 0000 0017         PORTB = 0x08;
+	LDI  R30,LOW(8)
+	RCALL SUBOPT_0x0
+; 0000 0018         delay_ms(delay);
+; 0000 0019         PORTB = 0x0a;
 	LDI  R30,LOW(10)
-	LDI  R31,HIGH(10)
-	RCALL __DIVW21U
-	OUT  0x31,R30
-; 0000 000E         delay_ms(20);
-	LDI  R26,LOW(20)
-	LDI  R27,0
-	RCALL _delay_ms
-; 0000 000F     }
+	RCALL SUBOPT_0x0
+; 0000 001A         delay_ms(delay);
+; 0000 001B     }
 	RJMP _0x3
-; 0000 0010 }
+; 0000 001C }
 _0x6:
 	RJMP _0x6
 ; .FEND
-;unsigned int ADC(unsigned char ADCS) {
-; 0000 0011 unsigned int ADC(unsigned char ADCS) {
+;unsigned char ADC(unsigned char ADCS) {
+; 0000 001D unsigned char ADC(unsigned char ADCS) {
 _ADC:
 ; .FSTART _ADC
-; 0000 0012     ADMUX = 0x00;
+; 0000 001E     ADMUX = 0x20;
 	ST   -Y,R17
 	MOV  R17,R26
 ;	ADCS -> R17
-	LDI  R30,LOW(0)
+	LDI  R30,LOW(32)
 	OUT  0x7,R30
-; 0000 0013     ADCSRA = ADCS;
+; 0000 001F     ADCSRA = ADCS;
 	OUT  0x6,R17
-; 0000 0014     ADCSRA |= 0x40; //(1<<ADSC)
+; 0000 0020     ADCSRA |= 0x40; //(1<<ADSC)
 	SBI  0x6,6
-; 0000 0015     delay_us(10);
+; 0000 0021     delay_us(10);
 	__DELAY_USB 27
-; 0000 0016     while(ADIF == 0);
-; 0000 0017     return ADCW;
-	IN   R30,0x4
-	IN   R31,0x4+1
+; 0000 0022     while(ADIF == 0);
+; 0000 0023     return ADCH;
+	IN   R30,0x5
 	LD   R17,Y+
 	RET
-; 0000 0018 }
+; 0000 0024 }
 ; .FEND
-;
 
 	.CSEG
+;OPTIMIZER ADDED SUBROUTINE, CALLED 8 TIMES, CODE SIZE REDUCTION:19 WORDS
+SUBOPT_0x0:
+	OUT  0x18,R30
+	MOV  R26,R5
+	CLR  R27
+	RJMP _delay_ms
+
 ;RUNTIME LIBRARY
 
 	.CSEG
+__ANEGW1:
+	NEG  R31
+	NEG  R30
+	SBCI R31,0
+	RET
+
 __DIVW21U:
 	CLR  R0
 	CLR  R1
@@ -1300,6 +1336,32 @@ __DIVW21U3:
 	BRNE __DIVW21U1
 	MOVW R30,R26
 	MOVW R26,R0
+	RET
+
+__DIVW21:
+	RCALL __CHKSIGNW
+	RCALL __DIVW21U
+	BRTC __DIVW211
+	RCALL __ANEGW1
+__DIVW211:
+	RET
+
+__CHKSIGNW:
+	CLT
+	SBRS R31,7
+	RJMP __CHKSW1
+	RCALL __ANEGW1
+	SET
+__CHKSW1:
+	SBRS R27,7
+	RJMP __CHKSW2
+	NEG  R27
+	NEG  R26
+	SBCI R27,0
+	BLD  R0,0
+	INC  R0
+	BST  R0,0
+__CHKSW2:
 	RET
 
 _delay_ms:

@@ -9,9 +9,10 @@ Variable                                                                        
 Register Allocation
 Variable                                                                          Register  Size
 ------------------------------------------------------------------------------------------------
+delay                                                                             R5           1
 
 FLASH Allocation [words]
 Function                                                                          Address   Size
 ------------------------------------------------------------------------------------------------
-main                                                                              0x00064     26
-ADC                                                                               0x0007E     13
+main                                                                              0x00064     36
+ADC                                                                               0x00088     12
