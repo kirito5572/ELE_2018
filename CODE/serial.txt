@@ -1,0 +1,14 @@
+for(i = 0; i < 8; i++) {
+    if(PORTAnum[i] == 1) {
+            switch(i) {
+                case 0: PORTAnumchar = 1; break;
+                case 1: PORTAnumchar += 2; break;
+                case 2: PORTAnumchar += 4; break;
+                case 3: PORTAnumchar += 8; break;
+                case 4: PORTAnumchar += 16; break;
+                case 5: PORTAnumchar += 32; break;
+                case 6: PORTAnumchar += 64; break;
+                case 7: PORTAnumchar += 128; break;
+            }
+        }            
+    }

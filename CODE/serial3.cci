@@ -1,0 +1,10 @@
+VERSION:3 SOURCE_TIMESTAMP:4D6F44AE
+NODE:V LEVEL:0 LINE:7 "rx -> R5"
+NODE:I LEVEL:0 LINE:8 "C:\cvavreval\inc\mega128.h"
+NODE:I LEVEL:0 LINE:9 "C:\cvavreval\inc\delay.h"
+NODE:I LEVEL:0 LINE:10 "C:\cvavreval\inc\lcd.h"
+NODE:V LEVEL:0 LINE:14 "PORTAnum -> RAM:????"
+NODE:V LEVEL:0 LINE:14 "PORTAnumchar -> R4"
+NODE:F LEVEL:0 LINE:15 "Getch(void)"
+NODE:F LEVEL:0 LINE:20 "PORTAnumadder(void)"
+NODE:F LEVEL:0 LINE:38 "main(void)"

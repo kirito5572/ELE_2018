@@ -1,0 +1,37 @@
+/*
+ * serial1.c
+ *
+ * Created: 2018-09-13 ¿ÀÀü 10:21:24
+ * Author: Administrator
+ */
+unsigned char rx;
+#include <mega128.h>
+#include <delay.h>
+void main(void) {
+    DDRB = 0xff;     
+    UCSR0A = 0x00;
+    UCSR0B = 0xd8;
+    UCSR0C = 0x06;
+    UBRR0H = 0;
+    UBRR0L = 51;
+    SREG = 0x80;
+    while (1) {
+        if(rx=='A') {
+            PORTB = 0x10;
+        }
+        else if(rx=='S') {
+            PORTB = 0x00;
+        }
+        else if(rx=='D') {
+            PORTB = 0x20;
+        }
+    }
+}
+interrupt [USART0_RXC] void RX_inter(void) {
+    rx = UDR0;
+    UCSR0B |= 0x20;
+}
+interrupt [USART0_DRE] void TX_inter(void) {
+    UDR0 = rx;
+    UCSR0B &= 0xdf;
+}

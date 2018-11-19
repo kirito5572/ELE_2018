@@ -1,0 +1,15 @@
+#include <mega128.h>
+#include <delay.h>
+#define ADC_VREF_TYPE ((0<<REFS1) | (0<<REFS0) | (0<<ADLAR))
+
+unsigned int read_adc(unsigned char adc_input) {
+    ADMUX=adc_input | ADC_VREF_TYPE;
+    delay_us(10);
+    ADCSRA|=(1<<ADSC);
+    while ((ADCSRA & (1<<ADIF))==0);
+    ADCSRA|=(1<<ADIF);
+    return ADCW;
+}
+void main() {
+    DDRA = 0xff;
+}

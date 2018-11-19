@@ -1,6 +1,7 @@
 RAM Allocation [bytes]
 Variable                                                                          Address   Size
 ------------------------------------------------------------------------------------------------
+key_scan                                                                          0x0500       4
 
 EEPROM Allocation [bytes]
 Variable                                                                          Address   Size
@@ -9,10 +10,19 @@ Variable                                                                        
 Register Allocation
 Variable                                                                          Register  Size
 ------------------------------------------------------------------------------------------------
-delay                                                                             R5           1
+count                                                                             R4,R5        2
+scan                                                                              R7           1
+data                                                                              R6           1
+sum                                                                               R9           1
+lcount                                                                            R8           1
+sdata                                                                             R11          1
+sta                                                                               R10          1
 
 FLASH Allocation [words]
 Function                                                                          Address   Size
 ------------------------------------------------------------------------------------------------
-main                                                                              0x00064     36
-ADC                                                                               0x00088     12
+main                                                                              0x0007C     36
+calculator                                                                        0x000A0    121
+scanning                                                                          0x00119     62
+FND                                                                               0x00157     37
+cls                                                                               0x0017C     56

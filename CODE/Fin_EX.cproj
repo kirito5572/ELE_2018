@@ -38,7 +38,7 @@
   <ItemGroup>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Fin_Ex26.c">
+    <Compile Include="Fin_Keypad2.c">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>

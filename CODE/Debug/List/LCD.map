@@ -1,0 +1,23 @@
+RAM Allocation [bytes]
+Variable                                                                          Address   Size
+------------------------------------------------------------------------------------------------
+
+EEPROM Allocation [bytes]
+Variable                                                                          Address   Size
+------------------------------------------------------------------------------------------------
+
+Register Allocation
+Variable                                                                          Register  Size
+------------------------------------------------------------------------------------------------
+speed                                                                             R5           1
+
+FLASH Allocation [words]
+Function                                                                          Address   Size
+------------------------------------------------------------------------------------------------
+write_data                                                                        0x00074     17
+init_LCD                                                                          0x00085     10
+LCD_String                                                                        0x0008F     16
+write_num                                                                         0x0009F     36
+init                                                                              0x000C3     23
+main                                                                              0x000DA     17
+ADCinter                                                                          0x000EB      3

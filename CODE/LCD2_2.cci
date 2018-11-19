@@ -1,0 +1,12 @@
+VERSION:3 SOURCE_TIMESTAMP:4D175DB3
+NODE:I LEVEL:0 LINE:1 "C:\cvavreval\inc\mega128.h"
+NODE:I LEVEL:0 LINE:2 "C:\cvavreval\inc\delay.h"
+NODE:V LEVEL:0 LINE:3 "speed -> R5"
+NODE:F LEVEL:0 LINE:4 "write_cmd(unsigned char cmd)"
+NODE:F LEVEL:0 LINE:10 "write_data(unsigned char data)"
+NODE:F LEVEL:0 LINE:16 "init_LCD(void)"
+NODE:F LEVEL:0 LINE:22 "LCD_String(flash unsigned char * str)"
+NODE:F LEVEL:0 LINE:27 "write_num(void)"
+NODE:F LEVEL:0 LINE:38 "init(void)"
+NODE:F LEVEL:0 LINE:51 "main(void)"
+NODE:F LEVEL:0 LINE:63 "ADCinter(void)"

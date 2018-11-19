@@ -1,0 +1,9 @@
+VERSION:3 SOURCE_TIMESTAMP:4D68573B
+NODE:I LEVEL:0 LINE:1 "C:\cvavreval\inc\mega128.h"
+NODE:I LEVEL:0 LINE:2 "C:\cvavreval\inc\spi.h"
+NODE:I LEVEL:0 LINE:3 "C:\cvavreval\inc\delay.h"
+NODE:I LEVEL:0 LINE:4 "C:\cvavreval\inc\alcd.h"
+NODE:V LEVEL:0 LINE:5 "temp1 -> R4,R5"
+NODE:V LEVEL:0 LINE:5 "temp2 -> R6,R7"
+NODE:V LEVEL:0 LINE:6 "temp -> R8,R9"
+NODE:F LEVEL:0 LINE:7 "main(void)"

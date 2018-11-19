@@ -1,0 +1,46 @@
+#include <mega128.h>
+#include <delay.h>
+unsigned int count;
+unsigned char key_scan[4] = {0x10, 0x20, 0x40, 0x80}, scan, data;
+void FND();
+void scanning();
+void main() {
+    DDRA = 0xf0;
+    DDRD = 0xff;
+    while(1) {
+        scanning();
+        FND();
+    }
+}
+void scanning() {
+    scan = ++scan % 4;
+    switch(scan) {
+        case 0: PORTA = key_scan[scan]; data = 1; break;
+        case 1: PORTA = key_scan[scan]; data = 4; break;
+        case 2: PORTA = key_scan[scan]; data = 7; break;
+        case 3: PORTA = key_scan[scan]; data = 10; break;
+    }
+    delay_ms(5);
+    if(PINA.0 == 1) {
+        count = data;
+    } else if(PINA.1 == 1) {
+        count = 1 + data;
+        if(data == 10) {
+            count = 0;
+        }
+    } else if(PINA.2 == 1) {
+        count = 2 + data;
+    }
+}
+void FND() {
+    unsigned char st;
+    st = count % 10;
+    PORTD = 0x70 | st;
+    delay_ms(5);
+    PORTD = 0xb0;
+    delay_ms(5);
+    PORTD = 0xd0;
+    delay_ms(5);
+    PORTD = 0xe0;
+    delay_ms(5);
+}

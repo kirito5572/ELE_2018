@@ -1094,7 +1094,14 @@ __DELAY_USW_LOOP:
 	.ENDM
 
 ;NAME DEFINITIONS FOR GLOBAL VARIABLES ALLOCATED TO REGISTERS
-	.DEF _delay=R5
+	.DEF _count=R4
+	.DEF _count_msb=R5
+	.DEF _scan=R7
+	.DEF _data=R6
+	.DEF _sum=R9
+	.DEF _lcount=R8
+	.DEF _sdata=R11
+	.DEF _sta=R10
 
 	.CSEG
 	.ORG 0x00
@@ -1139,6 +1146,19 @@ __START_OF_CODE:
 	JMP  0x00
 	JMP  0x00
 
+_0x3:
+	.DB  0x10,0x20,0x40,0x80
+
+__GLOBAL_INI_TBL:
+	.DW  0x04
+	.DW  _key_scan
+	.DW  _0x3*2
+
+_0xFFFFFFFF:
+	.DW  0
+
+#define __GLOBAL_INI_TBL_PRESENT 1
+
 __RESET:
 	CLI
 	CLR  R30
@@ -1169,6 +1189,29 @@ __CLEAR_SRAM:
 	ST   X+,R30
 	SBIW R24,1
 	BRNE __CLEAR_SRAM
+
+;GLOBAL VARIABLES INITIALIZATION
+	LDI  R30,LOW(__GLOBAL_INI_TBL*2)
+	LDI  R31,HIGH(__GLOBAL_INI_TBL*2)
+__GLOBAL_INI_NEXT:
+	LPM  R24,Z+
+	LPM  R25,Z+
+	SBIW R24,0
+	BREQ __GLOBAL_INI_END
+	LPM  R26,Z+
+	LPM  R27,Z+
+	LPM  R0,Z+
+	LPM  R1,Z+
+	MOVW R22,R30
+	MOVW R30,R0
+__GLOBAL_INI_LOOP:
+	LPM  R0,Z+
+	ST   X+,R0
+	SBIW R24,1
+	BRNE __GLOBAL_INI_LOOP
+	MOVW R30,R22
+	RJMP __GLOBAL_INI_NEXT
+__GLOBAL_INI_END:
 
 	OUT  RAMPZ,R24
 
@@ -1204,114 +1247,662 @@ __CLEAR_SRAM:
 	.SET power_ctrl_reg=mcucr
 	#endif
 ;#include <delay.h>
-;unsigned char delay;
-;unsigned char ADC(unsigned char);
+;unsigned int count;
+;unsigned char key_scan[4] = {0x10, 0x20, 0x40, 0x80}, scan, data, sum, lcount, sdata, sta;
+
+	.DSEG
+;void FND();
+;void scanning();
+;void calculator();
+;void cls();
 ;void main() {
-; 0000 0005 void main() {
+; 0000 0009 void main() {
 
 	.CSEG
 _main:
 ; .FSTART _main
-; 0000 0006     DDRB = 0x0f;
-	LDI  R30,LOW(15)
-	OUT  0x17,R30
-; 0000 0007     DDRF = 0xf0;
+; 0000 000A     DDRA = 0xf0;
 	LDI  R30,LOW(240)
-	STS  97,R30
-; 0000 0008     ADCW = 0x0000;
-	LDI  R30,LOW(0)
-	LDI  R31,HIGH(0)
-	OUT  0x4+1,R31
-	OUT  0x4,R30
-; 0000 0009     while(1) {
-_0x3:
-; 0000 000A         delay = (ADC(0x8f) / 6) + 10;
-	LDI  R26,LOW(143)
-	RCALL _ADC
-	LDI  R31,0
-	MOVW R26,R30
-	LDI  R30,LOW(6)
-	LDI  R31,HIGH(6)
-	RCALL __DIVW21
-	SUBI R30,-LOW(10)
-	MOV  R5,R30
-; 0000 000B         PORTB = 0x01;
+	OUT  0x1A,R30
+; 0000 000B     DDRD = 0xff;
+	LDI  R30,LOW(255)
+	OUT  0x11,R30
+; 0000 000C     while(1) {
+_0x4:
+; 0000 000D         if(sta == 0) {
+	TST  R10
+	BRNE _0x7
+; 0000 000E             scanning();
+	RCALL _scanning
+; 0000 000F         }
+; 0000 0010         if(sdata == 20 | sdata == 30) {
+_0x7:
+	MOV  R26,R11
+	LDI  R30,LOW(20)
+	RCALL __EQB12
+	MOV  R0,R30
+	LDI  R30,LOW(30)
+	RCALL __EQB12
+	OR   R30,R0
+	BREQ _0x8
+; 0000 0011             lcount = count;
+	MOV  R8,R4
+; 0000 0012             count = 0;
+	CLR  R4
+	CLR  R5
+; 0000 0013             while(1) {
+_0x9:
+; 0000 0014                 calculator();
+	RCALL _calculator
+; 0000 0015                 FND();
+	RCALL _FND
+; 0000 0016                 if(sum != 0) {
+	TST  R9
+	BREQ _0xC
+; 0000 0017                     cls();
+	RCALL _cls
+; 0000 0018                     break;
+	RJMP _0xB
+; 0000 0019                 }
+; 0000 001A             }
+_0xC:
+	RJMP _0x9
+_0xB:
+; 0000 001B         }
+; 0000 001C         FND();
+_0x8:
+	RCALL _FND
+; 0000 001D         if(sta == 1) {
 	LDI  R30,LOW(1)
-	RCALL SUBOPT_0x0
-; 0000 000C         delay_ms(delay);
-; 0000 000D         PORTB = 0x09;
-	LDI  R30,LOW(9)
-	RCALL SUBOPT_0x0
-; 0000 000E         delay_ms(delay);
-; 0000 000F         PORTB = 0x04;
-	LDI  R30,LOW(4)
-	RCALL SUBOPT_0x0
-; 0000 0010         delay_ms(delay);
-; 0000 0011         PORTB = 0x05;
-	LDI  R30,LOW(5)
-	RCALL SUBOPT_0x0
-; 0000 0012         delay_ms(delay);
-; 0000 0013         PORTB = 0x02;
-	LDI  R30,LOW(2)
-	RCALL SUBOPT_0x0
-; 0000 0014         delay_ms(delay);
-; 0000 0015         PORTB = 0x06;
-	LDI  R30,LOW(6)
-	RCALL SUBOPT_0x0
-; 0000 0016         delay_ms(delay);
-; 0000 0017         PORTB = 0x08;
-	LDI  R30,LOW(8)
-	RCALL SUBOPT_0x0
-; 0000 0018         delay_ms(delay);
-; 0000 0019         PORTB = 0x0a;
-	LDI  R30,LOW(10)
-	RCALL SUBOPT_0x0
-; 0000 001A         delay_ms(delay);
-; 0000 001B     }
-	RJMP _0x3
-; 0000 001C }
-_0x6:
-	RJMP _0x6
-; .FEND
-;unsigned char ADC(unsigned char ADCS) {
-; 0000 001D unsigned char ADC(unsigned char ADCS) {
-_ADC:
-; .FSTART _ADC
-; 0000 001E     ADMUX = 0x20;
-	ST   -Y,R17
-	MOV  R17,R26
-;	ADCS -> R17
-	LDI  R30,LOW(32)
-	OUT  0x7,R30
-; 0000 001F     ADCSRA = ADCS;
-	OUT  0x6,R17
-; 0000 0020     ADCSRA |= 0x40; //(1<<ADSC)
-	SBI  0x6,6
-; 0000 0021     delay_us(10);
-	__DELAY_USB 27
-; 0000 0022     while(ADIF == 0);
-; 0000 0023     return ADCH;
-	IN   R30,0x5
-	LD   R17,Y+
-	RET
+	CP   R30,R10
+	BRNE _0xD
+; 0000 001E             PORTA = key_scan[3];
+	__GETB1MN _key_scan,3
+	OUT  0x1B,R30
+; 0000 001F             if(PINA.0 == 0) {
+	SBIS 0x19,0
+; 0000 0020                 sta = 0;
+	CLR  R10
+; 0000 0021             }
+; 0000 0022         }
+; 0000 0023     }
+_0xD:
+	RJMP _0x4
 ; 0000 0024 }
+_0xF:
+	RJMP _0xF
+; .FEND
+;void calculator() {
+; 0000 0025 void calculator() {
+_calculator:
+; .FSTART _calculator
+; 0000 0026     scan = ++scan % 4;
+	RCALL SUBOPT_0x0
+; 0000 0027     switch(scan) {
+; 0000 0028         case 0: PORTA = key_scan[scan]; data = 1; break;
+	BRNE _0x13
+	RCALL SUBOPT_0x1
+	LDI  R30,LOW(1)
+	RJMP _0x5B
+; 0000 0029         case 1: PORTA = key_scan[scan]; data = 4; break;
+_0x13:
+	CPI  R30,LOW(0x1)
+	LDI  R26,HIGH(0x1)
+	CPC  R31,R26
+	BRNE _0x14
+	RCALL SUBOPT_0x1
+	LDI  R30,LOW(4)
+	RJMP _0x5B
+; 0000 002A         case 2: PORTA = key_scan[scan]; data = 7; break;
+_0x14:
+	CPI  R30,LOW(0x2)
+	LDI  R26,HIGH(0x2)
+	CPC  R31,R26
+	BRNE _0x15
+	RCALL SUBOPT_0x1
+	LDI  R30,LOW(7)
+	RJMP _0x5B
+; 0000 002B         case 3: PORTA = key_scan[scan]; data = 10; break;
+_0x15:
+	CPI  R30,LOW(0x3)
+	LDI  R26,HIGH(0x3)
+	CPC  R31,R26
+	BRNE _0x12
+	RCALL SUBOPT_0x1
+	LDI  R30,LOW(10)
+_0x5B:
+	MOV  R6,R30
+; 0000 002C     }
+_0x12:
+; 0000 002D     delay_ms(5);
+	LDI  R26,LOW(5)
+	LDI  R27,0
+	RCALL _delay_ms
+; 0000 002E     if(PINA.0 == 1) {
+	SBIS 0x19,0
+	RJMP _0x17
+; 0000 002F         if(sdata == 20 && data != 10) {
+	LDI  R30,LOW(20)
+	CP   R30,R11
+	BRNE _0x19
+	LDI  R30,LOW(10)
+	CP   R30,R6
+	BRNE _0x1A
+_0x19:
+	RJMP _0x18
+_0x1A:
+; 0000 0030             count = data;
+	MOV  R4,R6
+	CLR  R5
+; 0000 0031             sum = lcount + count;
+	MOV  R30,R4
+	ADD  R30,R8
+	MOV  R9,R30
+; 0000 0032         } else if (sdata == 30 && data != 10) {
+	RJMP _0x1B
+_0x18:
+	LDI  R30,LOW(30)
+	CP   R30,R11
+	BRNE _0x1D
+	LDI  R30,LOW(10)
+	CP   R30,R6
+	BRNE _0x1E
+_0x1D:
+	RJMP _0x1C
+_0x1E:
+; 0000 0033             sum = lcount - count;
+	MOV  R30,R8
+	SUB  R30,R4
+	MOV  R9,R30
+; 0000 0034         } else if (data == 10){
+	RJMP _0x1F
+_0x1C:
+	LDI  R30,LOW(10)
+	CP   R30,R6
+	BREQ _0x21
+; 0000 0035 
+; 0000 0036         } else {
+; 0000 0037             count = data;
+	MOV  R4,R6
+	CLR  R5
+; 0000 0038         }
+_0x21:
+_0x1F:
+_0x1B:
+; 0000 0039     } else if(PINA.1 == 1) {
+	RJMP _0x22
+_0x17:
+	SBIS 0x19,1
+	RJMP _0x23
+; 0000 003A         if(sdata == 20 && data != 10) {
+	LDI  R30,LOW(20)
+	CP   R30,R11
+	BRNE _0x25
+	LDI  R30,LOW(10)
+	CP   R30,R6
+	BRNE _0x26
+_0x25:
+	RJMP _0x24
+_0x26:
+; 0000 003B             count = data + 1;
+	RCALL SUBOPT_0x2
+; 0000 003C             sum = lcount + count;
+	MOV  R30,R4
+	ADD  R30,R8
+	MOV  R9,R30
+; 0000 003D         } else if (sdata == 30 && data != 10) {
+	RJMP _0x27
+_0x24:
+	LDI  R30,LOW(30)
+	CP   R30,R11
+	BRNE _0x29
+	LDI  R30,LOW(10)
+	CP   R30,R6
+	BRNE _0x2A
+_0x29:
+	RJMP _0x28
+_0x2A:
+; 0000 003E             sum = lcount - count;
+	MOV  R30,R8
+	SUB  R30,R4
+	MOV  R9,R30
+; 0000 003F         } else if (data == 10){
+	RJMP _0x2B
+_0x28:
+	LDI  R30,LOW(10)
+	CP   R30,R6
+	BREQ _0x2D
+; 0000 0040 
+; 0000 0041         } else {
+; 0000 0042             count = 1 + data;
+	RCALL SUBOPT_0x2
+; 0000 0043         }
+_0x2D:
+_0x2B:
+_0x27:
+; 0000 0044     } else if(PINA.2 == 1) {
+	RJMP _0x2E
+_0x23:
+	SBIS 0x19,2
+	RJMP _0x2F
+; 0000 0045         if(sdata == 20 && data != 10) {
+	LDI  R30,LOW(20)
+	CP   R30,R11
+	BRNE _0x31
+	LDI  R30,LOW(10)
+	CP   R30,R6
+	BRNE _0x32
+_0x31:
+	RJMP _0x30
+_0x32:
+; 0000 0046             count = data + 2;
+	RCALL SUBOPT_0x3
+; 0000 0047             sum = lcount + count;
+	MOV  R30,R4
+	ADD  R30,R8
+	MOV  R9,R30
+; 0000 0048         } else if (sdata == 30 && data != 10) {
+	RJMP _0x33
+_0x30:
+	LDI  R30,LOW(30)
+	CP   R30,R11
+	BRNE _0x35
+	LDI  R30,LOW(10)
+	CP   R30,R6
+	BRNE _0x36
+_0x35:
+	RJMP _0x34
+_0x36:
+; 0000 0049             sum = lcount - count;
+	MOV  R30,R8
+	SUB  R30,R4
+	MOV  R9,R30
+; 0000 004A         } else if (data == 10){
+	RJMP _0x37
+_0x34:
+	LDI  R30,LOW(10)
+	CP   R30,R6
+	BREQ _0x39
+; 0000 004B 
+; 0000 004C         } else {
+; 0000 004D             count = 2 + data;
+	RCALL SUBOPT_0x3
+; 0000 004E         }
+_0x39:
+_0x37:
+_0x33:
+; 0000 004F     }
+; 0000 0050 }
+_0x2F:
+_0x2E:
+_0x22:
+	RET
+; .FEND
+;void scanning() {
+; 0000 0051 void scanning() {
+_scanning:
+; .FSTART _scanning
+; 0000 0052     scan = ++scan % 4;
+	RCALL SUBOPT_0x0
+; 0000 0053     switch(scan) {
+; 0000 0054         case 0: PORTA = key_scan[scan]; data = 1; break;
+	BRNE _0x3D
+	RCALL SUBOPT_0x1
+	LDI  R30,LOW(1)
+	RJMP _0x5C
+; 0000 0055         case 1: PORTA = key_scan[scan]; data = 4; break;
+_0x3D:
+	CPI  R30,LOW(0x1)
+	LDI  R26,HIGH(0x1)
+	CPC  R31,R26
+	BRNE _0x3E
+	RCALL SUBOPT_0x1
+	LDI  R30,LOW(4)
+	RJMP _0x5C
+; 0000 0056         case 2: PORTA = key_scan[scan]; data = 7; break;
+_0x3E:
+	CPI  R30,LOW(0x2)
+	LDI  R26,HIGH(0x2)
+	CPC  R31,R26
+	BRNE _0x3F
+	RCALL SUBOPT_0x1
+	LDI  R30,LOW(7)
+	RJMP _0x5C
+; 0000 0057         case 3: PORTA = key_scan[scan]; data = 10; break;
+_0x3F:
+	CPI  R30,LOW(0x3)
+	LDI  R26,HIGH(0x3)
+	CPC  R31,R26
+	BRNE _0x3C
+	RCALL SUBOPT_0x1
+	LDI  R30,LOW(10)
+_0x5C:
+	MOV  R6,R30
+; 0000 0058     }
+_0x3C:
+; 0000 0059     delay_ms(5);
+	LDI  R26,LOW(5)
+	LDI  R27,0
+	RCALL _delay_ms
+; 0000 005A     if(PINA.0 == 1) {
+	SBIS 0x19,0
+	RJMP _0x41
+; 0000 005B         if(data == 10) {
+	LDI  R30,LOW(10)
+	CP   R30,R6
+	BRNE _0x42
+; 0000 005C             sdata = 20;
+	LDI  R30,LOW(20)
+	MOV  R11,R30
+; 0000 005D         }
+; 0000 005E         else {
+	RJMP _0x43
+_0x42:
+; 0000 005F             count = data;
+	MOV  R4,R6
+	CLR  R5
+; 0000 0060         }
+_0x43:
+; 0000 0061     } else if(PINA.1 == 1) {
+	RJMP _0x44
+_0x41:
+	SBIS 0x19,1
+	RJMP _0x45
+; 0000 0062         count = 1 + data;
+	RCALL SUBOPT_0x2
+; 0000 0063         if(data == 10) {
+	LDI  R30,LOW(10)
+	CP   R30,R6
+	BRNE _0x46
+; 0000 0064             count = 0;
+	CLR  R4
+	CLR  R5
+; 0000 0065         }
+; 0000 0066     } else if(PINA.2 == 1) {
+_0x46:
+	RJMP _0x47
+_0x45:
+	SBIS 0x19,2
+	RJMP _0x48
+; 0000 0067         if(data == 10) {
+	LDI  R30,LOW(10)
+	CP   R30,R6
+	BRNE _0x49
+; 0000 0068             sdata = 30;
+	LDI  R30,LOW(30)
+	MOV  R11,R30
+; 0000 0069         } else {
+	RJMP _0x4A
+_0x49:
+; 0000 006A             count = 2 + data;
+	RCALL SUBOPT_0x3
+; 0000 006B         }
+_0x4A:
+; 0000 006C     } else {
+	RJMP _0x4B
+_0x48:
+; 0000 006D         sdata = 40;
+	LDI  R30,LOW(40)
+	MOV  R11,R30
+; 0000 006E     }
+_0x4B:
+_0x47:
+_0x44:
+; 0000 006F }
+	RET
+; .FEND
+;void FND() {
+; 0000 0070 void FND() {
+_FND:
+; .FSTART _FND
+; 0000 0071     unsigned char st,nd,rd,th;
+; 0000 0072     st = count % 10;
+	RCALL __SAVELOCR4
+;	st -> R17
+;	nd -> R16
+;	rd -> R19
+;	th -> R18
+	MOVW R26,R4
+	LDI  R30,LOW(10)
+	LDI  R31,HIGH(10)
+	RCALL __MODW21U
+	MOV  R17,R30
+; 0000 0073     nd = lcount % 10;
+	MOV  R26,R8
+	RCALL SUBOPT_0x4
+	MOV  R16,R30
+; 0000 0074     rd = sum % 10;
+	MOV  R26,R9
+	RCALL SUBOPT_0x4
+	MOV  R19,R30
+; 0000 0075     th = (sum / 10) % 10;
+	MOV  R26,R9
+	LDI  R27,0
+	LDI  R30,LOW(10)
+	LDI  R31,HIGH(10)
+	RCALL __DIVW21
+	MOVW R26,R30
+	LDI  R30,LOW(10)
+	LDI  R31,HIGH(10)
+	RCALL __MODW21
+	MOV  R18,R30
+; 0000 0076     PORTD = 0x70 | st;
+	MOV  R30,R17
+	ORI  R30,LOW(0x70)
+	RCALL SUBOPT_0x5
+; 0000 0077     delay_ms(5);
+; 0000 0078     PORTD = 0xb0 | nd;
+	MOV  R30,R16
+	ORI  R30,LOW(0xB0)
+	RCALL SUBOPT_0x5
+; 0000 0079     delay_ms(5);
+; 0000 007A     PORTD = 0xd0 | rd;
+	MOV  R30,R19
+	ORI  R30,LOW(0xD0)
+	RCALL SUBOPT_0x5
+; 0000 007B     delay_ms(5);
+; 0000 007C     PORTD = 0xe0 | th;
+	MOV  R30,R18
+	ORI  R30,LOW(0xE0)
+	RCALL SUBOPT_0x5
+; 0000 007D     delay_ms(5);
+; 0000 007E }
+	RCALL __LOADLOCR4
+	ADIW R28,4
+	RET
+; .FEND
+;void cls() {
+; 0000 007F void cls() {
+_cls:
+; .FSTART _cls
+; 0000 0080     while(sta == 0) {
+_0x4C:
+	TST  R10
+	BRNE _0x4E
+; 0000 0081         scan = ++scan % 4;
+	RCALL SUBOPT_0x0
+; 0000 0082         switch(scan) {
+; 0000 0083             case 0: PORTA = key_scan[scan]; data = 1; break;
+	BRNE _0x52
+	RCALL SUBOPT_0x1
+	LDI  R30,LOW(1)
+	RJMP _0x5D
+; 0000 0084             case 1: PORTA = key_scan[scan]; data = 4; break;
+_0x52:
+	CPI  R30,LOW(0x1)
+	LDI  R26,HIGH(0x1)
+	CPC  R31,R26
+	BRNE _0x53
+	RCALL SUBOPT_0x1
+	LDI  R30,LOW(4)
+	RJMP _0x5D
+; 0000 0085             case 2: PORTA = key_scan[scan]; data = 7; break;
+_0x53:
+	CPI  R30,LOW(0x2)
+	LDI  R26,HIGH(0x2)
+	CPC  R31,R26
+	BRNE _0x54
+	RCALL SUBOPT_0x1
+	LDI  R30,LOW(7)
+	RJMP _0x5D
+; 0000 0086             case 3: PORTA = key_scan[scan]; data = 10; break;
+_0x54:
+	CPI  R30,LOW(0x3)
+	LDI  R26,HIGH(0x3)
+	CPC  R31,R26
+	BRNE _0x51
+	RCALL SUBOPT_0x1
+	LDI  R30,LOW(10)
+_0x5D:
+	MOV  R6,R30
+; 0000 0087         }
+_0x51:
+; 0000 0088         delay_ms(5);
+	LDI  R26,LOW(5)
+	LDI  R27,0
+	RCALL _delay_ms
+; 0000 0089         if(PINA.0 == 1) {
+	SBIS 0x19,0
+	RJMP _0x56
+; 0000 008A             if(data == 10) {
+	LDI  R30,LOW(10)
+	CP   R30,R6
+	BRNE _0x57
+; 0000 008B                 sta = 1;
+	LDI  R30,LOW(1)
+	MOV  R10,R30
+; 0000 008C             }
+; 0000 008D         } else if(PINA.2 == 1) {
+_0x57:
+	RJMP _0x58
+_0x56:
+	SBIS 0x19,2
+	RJMP _0x59
+; 0000 008E             if(data == 10) {
+	LDI  R30,LOW(10)
+	CP   R30,R6
+	BRNE _0x5A
+; 0000 008F                 sta = 1;
+	LDI  R30,LOW(1)
+	MOV  R10,R30
+; 0000 0090             }
+; 0000 0091         } FND();
+_0x5A:
+_0x59:
+_0x58:
+	RCALL _FND
+; 0000 0092     }
+	RJMP _0x4C
+_0x4E:
+; 0000 0093     scan = 0;
+	CLR  R7
+; 0000 0094     data = 0;
+	CLR  R6
+; 0000 0095     sum = 0;
+	CLR  R9
+; 0000 0096     lcount = 0;
+	CLR  R8
+; 0000 0097     sdata = 0;
+	CLR  R11
+; 0000 0098     count = 0;
+	CLR  R4
+	CLR  R5
+; 0000 0099 }
+	RET
 ; .FEND
 
+	.DSEG
+_key_scan:
+	.BYTE 0x4
+
 	.CSEG
-;OPTIMIZER ADDED SUBROUTINE, CALLED 8 TIMES, CODE SIZE REDUCTION:19 WORDS
+;OPTIMIZER ADDED SUBROUTINE, CALLED 3 TIMES, CODE SIZE REDUCTION:16 WORDS
 SUBOPT_0x0:
-	OUT  0x18,R30
-	MOV  R26,R5
+	INC  R7
+	MOV  R30,R7
+	LDI  R31,0
+	LDI  R26,LOW(3)
+	LDI  R27,HIGH(3)
+	RCALL __MANDW12
+	MOV  R7,R30
+	LDI  R31,0
+	SBIW R30,0
+	RET
+
+;OPTIMIZER ADDED SUBROUTINE, CALLED 12 TIMES, CODE SIZE REDUCTION:53 WORDS
+SUBOPT_0x1:
+	MOV  R30,R7
+	LDI  R31,0
+	SUBI R30,LOW(-_key_scan)
+	SBCI R31,HIGH(-_key_scan)
+	LD   R30,Z
+	OUT  0x1B,R30
+	RET
+
+;OPTIMIZER ADDED SUBROUTINE, CALLED 3 TIMES, CODE SIZE REDUCTION:4 WORDS
+SUBOPT_0x2:
+	MOV  R30,R6
+	LDI  R31,0
+	ADIW R30,1
+	MOVW R4,R30
+	RET
+
+;OPTIMIZER ADDED SUBROUTINE, CALLED 3 TIMES, CODE SIZE REDUCTION:4 WORDS
+SUBOPT_0x3:
+	MOV  R30,R6
+	LDI  R31,0
+	ADIW R30,2
+	MOVW R4,R30
+	RET
+
+;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:1 WORDS
+SUBOPT_0x4:
 	CLR  R27
+	LDI  R30,LOW(10)
+	LDI  R31,HIGH(10)
+	RCALL __MODW21
+	RET
+
+;OPTIMIZER ADDED SUBROUTINE, CALLED 4 TIMES, CODE SIZE REDUCTION:7 WORDS
+SUBOPT_0x5:
+	OUT  0x12,R30
+	LDI  R26,LOW(5)
+	LDI  R27,0
 	RJMP _delay_ms
 
 ;RUNTIME LIBRARY
 
 	.CSEG
+__SAVELOCR4:
+	ST   -Y,R19
+__SAVELOCR3:
+	ST   -Y,R18
+__SAVELOCR2:
+	ST   -Y,R17
+	ST   -Y,R16
+	RET
+
+__LOADLOCR4:
+	LDD  R19,Y+3
+__LOADLOCR3:
+	LDD  R18,Y+2
+__LOADLOCR2:
+	LDD  R17,Y+1
+	LD   R16,Y
+	RET
+
 __ANEGW1:
 	NEG  R31
 	NEG  R30
 	SBCI R31,0
+	RET
+
+__EQB12:
+	CP   R30,R26
+	LDI  R30,1
+	BREQ __EQB12T
+	CLR  R30
+__EQB12T:
 	RET
 
 __DIVW21U:
@@ -1344,6 +1935,43 @@ __DIVW21:
 	BRTC __DIVW211
 	RCALL __ANEGW1
 __DIVW211:
+	RET
+
+__MODW21U:
+	RCALL __DIVW21U
+	MOVW R30,R26
+	RET
+
+__MODW21:
+	CLT
+	SBRS R27,7
+	RJMP __MODW211
+	NEG  R27
+	NEG  R26
+	SBCI R27,0
+	SET
+__MODW211:
+	SBRC R31,7
+	RCALL __ANEGW1
+	RCALL __DIVW21U
+	MOVW R30,R26
+	BRTC __MODW212
+	RCALL __ANEGW1
+__MODW212:
+	RET
+
+__MANDW12:
+	CLT
+	SBRS R31,7
+	RJMP __MANDW121
+	RCALL __ANEGW1
+	SET
+__MANDW121:
+	AND  R30,R26
+	AND  R31,R27
+	BRTC __MANDW122
+	RCALL __ANEGW1
+__MANDW122:
 	RET
 
 __CHKSIGNW:
