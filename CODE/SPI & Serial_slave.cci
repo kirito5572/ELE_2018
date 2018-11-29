@@ -1,0 +1,8 @@
+VERSION:3 SOURCE_TIMESTAMP:4D7D584D
+NODE:I LEVEL:0 LINE:1 "C:\cvavreval\inc\mega128.h"
+NODE:I LEVEL:0 LINE:4 "C:\cvavreval\inc\spi.h"
+NODE:I LEVEL:0 LINE:7 "C:\cvavreval\inc\alcd.h"
+NODE:V LEVEL:0 LINE:12 "x -> R5"
+NODE:V LEVEL:0 LINE:12 "y -> R4"
+NODE:F LEVEL:0 LINE:14 "main(void)"
+NODE:F LEVEL:0 LINE:77 "SPI_SlaveReceive(void)"

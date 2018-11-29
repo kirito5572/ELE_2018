@@ -1,0 +1,84 @@
+#include <mega128.h>
+
+// SPI functions
+#include <spi.h>
+
+// Alphanumeric LCD functions
+#include <alcd.h>
+
+// Declare your global variables here
+char SPI_SlaveReceive(void);
+
+unsigned char x, y;
+
+void main(void)
+{
+
+    // SPI initialization
+    // SPI Type: Slave
+    // SPI Clock Rate: 125.000 kHz
+    // SPI Clock Phase: Cycle Start
+    // SPI Clock Polarity: Low
+    // SPI Data Order: MSB First
+    SPCR=(0<<SPIE) | (1<<SPE) | (0<<DORD) | (0<<MSTR) | (0<<CPOL) | (0<<CPHA) | (0<<SPR1) | (0<<SPR0);
+    SPSR=(0<<SPI2X);
+
+    // Alphanumeric LCD initialization
+    // Connections are specified in the
+    // Project|Configure|C Compiler|Libraries|Alphanumeric LCD menu:
+    // RS - PORTA Bit 0
+    // RD - PORTA Bit 1
+    // EN - PORTA Bit 2
+    // D4 - PORTA Bit 4
+    // D5 - PORTA Bit 5
+    // D6 - PORTA Bit 6
+    // D7 - PORTA Bit 7
+    // Characters/line: 16
+    lcd_init(16);
+
+    while (1) {
+        unsigned char data;
+        data = SPI_SlaveReceive();
+        if(x == 16) {
+            x = 0;
+            y++;
+            if(y == 2) {
+                y = 0;
+                lcd_clear();
+            }
+        }
+        if(data == 0x08) { //backspace
+            x--;
+            if(x > 250 ) x = 0;
+            lcd_gotoxy(x,y);
+            lcd_putchar(data);
+            x--;
+        }
+        else if(data == 0x1b) { //esc
+            x = 0;
+            y = 0;
+            lcd_clear();
+        }
+        else {
+            lcd_gotoxy(x,y);
+            lcd_putchar(data);
+        }
+        x++;
+        if(data == 0x0d) { //enter
+            y++;
+            x = 0;
+            if(y == 2) {
+                y = 0;
+                lcd_clear();
+            }
+        }
+    }
+}
+char SPI_SlaveReceive(void) {
+    /* Wait for reception complete */
+    while(!(SPSR & (1<<SPIF)))
+    ;
+    
+    /* Return data register */
+    return SPDR;
+}
