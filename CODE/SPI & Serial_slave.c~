@@ -54,11 +54,6 @@ void main(void)
             lcd_putchar(data);
             x--;
         }
-        else if(data == 0x1b) { //esc
-            x = 0;
-            y = 0;
-            lcd_clear();
-        }
         else {
             lcd_gotoxy(x,y);
             lcd_putchar(data);
@@ -71,6 +66,11 @@ void main(void)
                 y = 0;
                 lcd_clear();
             }
+        }
+        else if(data == 0x1b) { //esc
+            x = 0;
+            y = 0;
+            lcd_clear();
         }
     }
 }

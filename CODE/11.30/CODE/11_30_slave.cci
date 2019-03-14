@@ -1,0 +1,13 @@
+VERSION:3 SOURCE_TIMESTAMP:4D7E6F2C
+NODE:I LEVEL:0 LINE:23 "C:\cvavreval\inc\mega128.h"
+NODE:I LEVEL:0 LINE:26 "C:\cvavreval\inc\spi.h"
+NODE:I LEVEL:0 LINE:29 "C:\cvavreval\inc\alcd.h"
+NODE:V LEVEL:0 LINE:38 "data -> R5"
+NODE:V LEVEL:0 LINE:38 "b -> R4"
+NODE:V LEVEL:0 LINE:38 "c -> R7"
+NODE:F LEVEL:0 LINE:40 "main(void)"
+NODE:F LEVEL:0 LINE:98 "SPI_Receive(void)"
+NODE:F LEVEL:0 LINE:103 "led_a(void)"
+NODE:F LEVEL:0 LINE:106 "led_b(void)"
+NODE:F LEVEL:0 LINE:113 "led_c(void)"
+NODE:F LEVEL:0 LINE:136 "led_d(void)"

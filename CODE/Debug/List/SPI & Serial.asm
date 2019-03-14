@@ -1216,8 +1216,8 @@ __CLEAR_SRAM:
 ;// Standard Input/Output functions
 ;#include <stdio.h>
 ;
-;unsigned char USART_Receive( void );
-;void SPI_MasterTransmit(unsigned char cData);
+;unsigned char USART_Receive( void );        /* 반환형이 unsigned char인 함수 */
+;void SPI_MasterTransmit(unsigned char cData);  /* 반환형이 void이나 함수 호출시에 입력값이 있는 함수 */
 ;
 ;void main(void)
 ; 0000 0010 {
@@ -1225,91 +1225,93 @@ __CLEAR_SRAM:
 	.CSEG
 _main:
 ; .FSTART _main
-; 0000 0011     DDRB = 0x0f;
+; 0000 0011     DDRB = 0x0f;     //SPI통신 출력 설정
 	LDI  R30,LOW(15)
 	OUT  0x17,R30
-; 0000 0012     // USART0 initialization
-; 0000 0013     // Communication Parameters: 8 Data, 1 Stop, No Parity
-; 0000 0014     // USART0 Receiver: On
-; 0000 0015     // USART0 Transmitter: Off
-; 0000 0016     // USART0 Mode: Asynchronous
-; 0000 0017     // USART0 Baud Rate: 9600
-; 0000 0018     UCSR0A=(0<<RXC0) | (0<<TXC0) | (0<<UDRE0) | (0<<FE0) | (0<<DOR0) | (0<<UPE0) | (0<<U2X0) | (0<<MPCM0);
+; 0000 0012 
+; 0000 0013     //위저드 사용으로 초기화
+; 0000 0014     // USART0 initialization
+; 0000 0015     // Communication Parameters: 8 Data, 1 Stop, No Parity
+; 0000 0016     // USART0 Receiver: On
+; 0000 0017     // USART0 Transmitter: Off
+; 0000 0018     // USART0 Mode: Asynchronous
+; 0000 0019     // USART0 Baud Rate: 9600
+; 0000 001A     UCSR0A=(0<<RXC0) | (0<<TXC0) | (0<<UDRE0) | (0<<FE0) | (0<<DOR0) | (0<<UPE0) | (0<<U2X0) | (0<<MPCM0);
 	LDI  R30,LOW(0)
 	OUT  0xB,R30
-; 0000 0019     UCSR0B=(0<<RXCIE0) | (0<<TXCIE0) | (0<<UDRIE0) | (1<<RXEN0) | (0<<TXEN0) | (0<<UCSZ02) | (0<<RXB80) | (0<<TXB80);
+; 0000 001B     UCSR0B=(0<<RXCIE0) | (0<<TXCIE0) | (0<<UDRIE0) | (1<<RXEN0) | (0<<TXEN0) | (0<<UCSZ02) | (0<<RXB80) | (0<<TXB80);
 	LDI  R30,LOW(16)
 	OUT  0xA,R30
-; 0000 001A     UCSR0C=(0<<UMSEL0) | (0<<UPM01) | (0<<UPM00) | (0<<USBS0) | (1<<UCSZ01) | (1<<UCSZ00) | (0<<UCPOL0);
+; 0000 001C     UCSR0C=(0<<UMSEL0) | (0<<UPM01) | (0<<UPM00) | (0<<USBS0) | (1<<UCSZ01) | (1<<UCSZ00) | (0<<UCPOL0);
 	LDI  R30,LOW(6)
 	STS  149,R30
-; 0000 001B     UBRR0H=0x00;
+; 0000 001D     UBRR0H=0x00;
 	LDI  R30,LOW(0)
 	STS  144,R30
-; 0000 001C     UBRR0L=0x67;
+; 0000 001E     UBRR0L=0x67;
 	LDI  R30,LOW(103)
 	OUT  0x9,R30
-; 0000 001D 
-; 0000 001E 
-; 0000 001F     // SPI initialization
-; 0000 0020     // SPI Type: Master
-; 0000 0021     // SPI Clock Rate: 125.000 kHz
-; 0000 0022     // SPI Clock Phase: Cycle Start
-; 0000 0023     // SPI Clock Polarity: Low
-; 0000 0024     // SPI Data Order: MSB First
-; 0000 0025     SPCR=(0<<SPIE) | (1<<SPE) | (0<<DORD) | (1<<MSTR) | (0<<CPOL) | (0<<CPHA) | (1<<SPR1) | (1<<SPR0);
+; 0000 001F 
+; 0000 0020 
+; 0000 0021     // SPI initialization
+; 0000 0022     // SPI Type: Master
+; 0000 0023     // SPI Clock Rate: 125.000 kHz
+; 0000 0024     // SPI Clock Phase: Cycle Start
+; 0000 0025     // SPI Clock Polarity: Low
+; 0000 0026     // SPI Data Order: MSB First
+; 0000 0027     SPCR=(0<<SPIE) | (1<<SPE) | (0<<DORD) | (1<<MSTR) | (0<<CPOL) | (0<<CPHA) | (1<<SPR1) | (1<<SPR0);
 	LDI  R30,LOW(83)
 	OUT  0xD,R30
-; 0000 0026     SPSR=(0<<SPI2X);
+; 0000 0028     SPSR=(0<<SPI2X);
 	LDI  R30,LOW(0)
 	OUT  0xE,R30
-; 0000 0027 
-; 0000 0028 
-; 0000 0029     while (1) {
+; 0000 0029 
+; 0000 002A 
+; 0000 002B     while (1) {
 _0x3:
-; 0000 002A         SPI_MasterTransmit(USART_Receive());
+; 0000 002C         SPI_MasterTransmit(USART_Receive());
 	RCALL _USART_Receive
 	MOV  R26,R30
 	RCALL _SPI_MasterTransmit
-; 0000 002B     }
+; 0000 002D     }
 	RJMP _0x3
-; 0000 002C }
+; 0000 002E }
 _0x6:
 	RJMP _0x6
 ; .FEND
-;unsigned char USART_Receive( void ) {
-; 0000 002D unsigned char USART_Receive( void ) {
+;unsigned char USART_Receive( void ) {   //데이터 시트에 있는 함수
+; 0000 002F unsigned char USART_Receive( void ) {
 _USART_Receive:
 ; .FSTART _USART_Receive
-; 0000 002E     /* Wait for data to be received */
-; 0000 002F     while ( !(UCSR0A & (1<<RXC0)) )
+; 0000 0030     /* 데이터 수신시까지 대기 하는 코드 */
+; 0000 0031     while ( !(UCSR0A & (1<<RXC0)) )         /*데이터 수신이 완료될경우, RXC0가 1이 된다.*/
 _0x7:
 	SBIS 0xB,7
-; 0000 0030     ;
+; 0000 0032     ;
 	RJMP _0x7
-; 0000 0031     /* Get and return received data from buffer */
-; 0000 0032     return UDR0;
+; 0000 0033     /* 수신이 완료된 데이터를 이 함수를 호출한 곳으로 반환한다. */
+; 0000 0034     return UDR0;
 	IN   R30,0xC
 	RET
-; 0000 0033 }
+; 0000 0035 }
 ; .FEND
-;void SPI_MasterTransmit(unsigned char cData) {
-; 0000 0034 void SPI_MasterTransmit(unsigned char cData) {
+;void SPI_MasterTransmit(unsigned char cData) {     //데이터 시트에 있는 함수
+; 0000 0036 void SPI_MasterTransmit(unsigned char cData) {
 _SPI_MasterTransmit:
 ; .FSTART _SPI_MasterTransmit
-; 0000 0035     /* Start transmission */
-; 0000 0036     SPDR = cData;
+; 0000 0037     /* 전송 시작 코드 */
+; 0000 0038     SPDR = cData;
 	ST   -Y,R17
 	MOV  R17,R26
 ;	cData -> R17
 	OUT  0xF,R17
-; 0000 0037     /* Wait for transmission complete */
-; 0000 0038     while(!(SPSR & (1<<SPIF)))
+; 0000 0039     /* 전송이 완료될때까지 대기 */
+; 0000 003A     while(!(SPSR & (1<<SPIF)))
 _0xA:
 	SBIS 0xE,7
-; 0000 0039     ;
+; 0000 003B     ;
 	RJMP _0xA
-; 0000 003A }
+; 0000 003C }
 	LD   R17,Y+
 	RET
 ; .FEND

@@ -1257,9 +1257,9 @@ __GLOBAL_INI_END:
 ;#include <alcd.h>
 ;
 ;// Declare your global variables here
-;char SPI_SlaveReceive(void);
+;char SPI_SlaveReceive(void);         //char형을 반환하는 함수
 ;
-;unsigned char x, y;
+;unsigned char x, y;        //lcd의 x,y를 결정하는 함수
 ;
 ;void main(void)
 ; 0000 000F {
@@ -1268,147 +1268,154 @@ __GLOBAL_INI_END:
 _main:
 ; .FSTART _main
 ; 0000 0010 
-; 0000 0011     // SPI initialization
-; 0000 0012     // SPI Type: Slave
-; 0000 0013     // SPI Clock Rate: 125.000 kHz
-; 0000 0014     // SPI Clock Phase: Cycle Start
-; 0000 0015     // SPI Clock Polarity: Low
-; 0000 0016     // SPI Data Order: MSB First
-; 0000 0017     SPCR=(0<<SPIE) | (1<<SPE) | (0<<DORD) | (0<<MSTR) | (0<<CPOL) | (0<<CPHA) | (0<<SPR1) | (0<<SPR0);
+; 0000 0011     //위저드 설정
+; 0000 0012 
+; 0000 0013     // SPI 초기화
+; 0000 0014     // SPI 타입: Slave
+; 0000 0015     // SPI 클럭 속도: 125.000 kHz
+; 0000 0016     // SPI Clock Phase: Cycle Start
+; 0000 0017     // SPI Clock Polarity: Low
+; 0000 0018     // SPI Data Order: MSB First
+; 0000 0019     SPCR=(0<<SPIE) | (1<<SPE) | (0<<DORD) | (0<<MSTR) | (0<<CPOL) | (0<<CPHA) | (0<<SPR1) | (0<<SPR0);
 	LDI  R30,LOW(64)
 	OUT  0xD,R30
-; 0000 0018     SPSR=(0<<SPI2X);
+; 0000 001A     SPSR=(0<<SPI2X);
 	LDI  R30,LOW(0)
 	OUT  0xE,R30
-; 0000 0019 
-; 0000 001A     // Alphanumeric LCD initialization
-; 0000 001B     // Connections are specified in the
-; 0000 001C     // Project|Configure|C Compiler|Libraries|Alphanumeric LCD menu:
-; 0000 001D     // RS - PORTA Bit 0
-; 0000 001E     // RD - PORTA Bit 1
-; 0000 001F     // EN - PORTA Bit 2
-; 0000 0020     // D4 - PORTA Bit 4
-; 0000 0021     // D5 - PORTA Bit 5
-; 0000 0022     // D6 - PORTA Bit 6
-; 0000 0023     // D7 - PORTA Bit 7
-; 0000 0024     // Characters/line: 16
-; 0000 0025     lcd_init(16);
+; 0000 001B 
+; 0000 001C     // Alphanumeric LCD initialization
+; 0000 001D     // Connections are specified in the
+; 0000 001E     // Project|Configure|C Compiler|Libraries|Alphanumeric LCD menu:
+; 0000 001F     // RS - PORTA Bit 0
+; 0000 0020     // RD - PORTA Bit 1
+; 0000 0021     // EN - PORTA Bit 2
+; 0000 0022     // D4 - PORTA Bit 4
+; 0000 0023     // D5 - PORTA Bit 5
+; 0000 0024     // D6 - PORTA Bit 6
+; 0000 0025     // D7 - PORTA Bit 7
+; 0000 0026     // Characters/line: 16
+; 0000 0027 
+; 0000 0028     //LCD는 포트A에 연결
+; 0000 0029     //asm을 사용했을경우 0x12가 아닌 0x1b를 넣으면 PORTD가 아닌 PORTA로 설정됨. 자세한 사항은 mega128.h참조
+; 0000 002A     lcd_init(16);               //LCD 초기화
 	LDI  R26,LOW(16)
 	RCALL _lcd_init
-; 0000 0026 
-; 0000 0027     while (1) {
+; 0000 002B 
+; 0000 002C     while (1) {
 _0x3:
-; 0000 0028         unsigned char data;
-; 0000 0029         data = SPI_SlaveReceive();
+; 0000 002D         unsigned char data;      //전송받은 데이터를 넣을 변수 선언
+; 0000 002E         data = SPI_SlaveReceive();          //데이터 수신
 	SBIW R28,1
 ;	data -> Y+0
 	RCALL _SPI_SlaveReceive
 	ST   Y,R30
-; 0000 002A         if(x == 16) {
+; 0000 002F         if(x == 16) {                       //X열 Y열 설정
 	LDI  R30,LOW(16)
 	CP   R30,R5
 	BRNE _0x6
-; 0000 002B             x = 0;
+; 0000 0030             x = 0;                          //X열이 16이상 없으므로 16이 될경우 y를 0->1 혹은 1->0으로만 변경
 	CLR  R5
-; 0000 002C             y++;
+; 0000 0031             y++;                            //하면 되므로, x가 16일때 y가 1증가하며 y가 2를 넘지 않으므로 2가
 	INC  R4
-; 0000 002D             if(y == 2) {
+; 0000 0032             if(y == 2) {                    //되면 y도 0이 되며 LCD가 초기화 된다.
 	LDI  R30,LOW(2)
 	CP   R30,R4
 	BRNE _0x7
-; 0000 002E                 y = 0;
+; 0000 0033                 y = 0;
 	CLR  R4
-; 0000 002F                 lcd_clear();
+; 0000 0034                 lcd_clear();
 	RCALL _lcd_clear
-; 0000 0030             }
-; 0000 0031         }
+; 0000 0035             }
+; 0000 0036         }
 _0x7:
-; 0000 0032         if(data == 0x08) { //backspace
+; 0000 0037         if(data == 0x08) { //backspace
 _0x6:
 	LD   R26,Y
 	CPI  R26,LOW(0x8)
 	BRNE _0x8
-; 0000 0033             x--;
+; 0000 0038             x--;                            //BACKSPACE키를 누를경우 LCD화면에서도 BACKSPACE기능이 동작하도록
 	DEC  R5
-; 0000 0034             if(x > 250 ) x = 0;
+; 0000 0039             if(x > 250 ) x = 0;             //짠 코드이나, 수행에는 이런거 안나오니 공부 안할꺼면 넘어가도됨
 	LDI  R30,LOW(250)
 	CP   R30,R5
 	BRSH _0x9
 	CLR  R5
-; 0000 0035             lcd_gotoxy(x,y);
+; 0000 003A             lcd_gotoxy(x,y);
 _0x9:
 	RCALL SUBOPT_0x0
-; 0000 0036             lcd_putchar(data);
-; 0000 0037             x--;
+; 0000 003B             lcd_putchar(data);
+; 0000 003C             x--;
 	DEC  R5
-; 0000 0038         }
-; 0000 0039         else {
+; 0000 003D         }
+; 0000 003E         else {                              //BACKSPACE이외의 코드가 들어온 경우(문자가 입력되야 하는 경우)
 	RJMP _0xA
 _0x8:
-; 0000 003A             lcd_gotoxy(x,y);
+; 0000 003F             lcd_gotoxy(x,y);                //X,Y 위치 설정
 	RCALL SUBOPT_0x0
-; 0000 003B             lcd_putchar(data);
-; 0000 003C         }
+; 0000 0040             lcd_putchar(data);              //데이터 출력
+; 0000 0041         }
 _0xA:
-; 0000 003D         x++;
+; 0000 0042 
+; 0000 0043         x++;                                //문자가 입력됬으니, X값을 증가시켜서 다음칸에 문자가 입력되게 해야함.
 	INC  R5
-; 0000 003E         if(data == 0x0d) { //enter
+; 0000 0044 
+; 0000 0045         if(data == 0x0d) { //enter
 	LD   R26,Y
 	CPI  R26,LOW(0xD)
 	BRNE _0xB
-; 0000 003F             y++;
+; 0000 0046             y++;                            //ENTER키를 누를경우 X값에 상관없이 다음줄로 넘어가도록 하는 코드
 	INC  R4
-; 0000 0040             x = 0;
+; 0000 0047             x = 0;                          //이 코드 역시 수행에는 영향이 없다.
 	CLR  R5
-; 0000 0041             if(y == 2) {
+; 0000 0048             if(y == 2) {
 	LDI  R30,LOW(2)
 	CP   R30,R4
 	BRNE _0xC
-; 0000 0042                 y = 0;
+; 0000 0049                 y = 0;
 	CLR  R4
-; 0000 0043                 lcd_clear();
+; 0000 004A                 lcd_clear();
 	RCALL _lcd_clear
-; 0000 0044             }
-; 0000 0045         }
+; 0000 004B             }
+; 0000 004C         }
 _0xC:
-; 0000 0046         else if(data == 0x1b) { //esc
+; 0000 004D         else if(data == 0x1b) { //esc
 	RJMP _0xD
 _0xB:
 	LD   R26,Y
 	CPI  R26,LOW(0x1B)
 	BRNE _0xE
-; 0000 0047             x = 0;
+; 0000 004E             x = 0;                          //ESC키를 누를경우 어느위치던지, LCD가 리셋되게 하는 코드
 	CLR  R5
-; 0000 0048             y = 0;
+; 0000 004F             y = 0;                          //이 코드 역시 수행에는 영향이 없다.
 	CLR  R4
-; 0000 0049             lcd_clear();
+; 0000 0050             lcd_clear();
 	RCALL _lcd_clear
-; 0000 004A         }
-; 0000 004B     }
+; 0000 0051         }
+; 0000 0052     }
 _0xE:
 _0xD:
 	ADIW R28,1
 	RJMP _0x3
-; 0000 004C }
+; 0000 0053 }
 _0xF:
 	RJMP _0xF
 ; .FEND
-;char SPI_SlaveReceive(void) {
-; 0000 004D char SPI_SlaveReceive(void) {
+;char SPI_SlaveReceive(void) {               //데이터 시트 코드 복사
+; 0000 0054 char SPI_SlaveReceive(void) {
 _SPI_SlaveReceive:
 ; .FSTART _SPI_SlaveReceive
-; 0000 004E     /* Wait for reception complete */
-; 0000 004F     while(!(SPSR & (1<<SPIF)))
+; 0000 0055     /* Wait for reception complete */
+; 0000 0056     while(!(SPSR & (1<<SPIF)))
 _0x10:
 	SBIS 0xE,7
-; 0000 0050     ;
+; 0000 0057     ;
 	RJMP _0x10
-; 0000 0051 
-; 0000 0052     /* Return data register */
-; 0000 0053     return SPDR;
+; 0000 0058 
+; 0000 0059     /* Return data register */
+; 0000 005A     return SPDR;
 	IN   R30,0xF
 	RET
-; 0000 0054 }
+; 0000 005B }
 ; .FEND
 	#ifndef __SLEEP_DEFINED__
 	#define __SLEEP_DEFINED__

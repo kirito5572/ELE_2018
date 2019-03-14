@@ -9,12 +9,14 @@
 // Standard Input/Output functions
 #include <stdio.h>
 
-unsigned char USART_Receive( void );
-void SPI_MasterTransmit(unsigned char cData);
+unsigned char USART_Receive( void );        /* 반환형이 unsigned char인 함수 */
+void SPI_MasterTransmit(unsigned char cData);  /* 반환형이 void이나 함수 호출시에 입력값이 있는 함수 */
 
 void main(void)
 {
-    DDRB = 0x0f;
+    DDRB = 0x0f;     //SPI통신 출력 설정
+    
+    //위저드 사용으로 초기화
     // USART0 initialization
     // Communication Parameters: 8 Data, 1 Stop, No Parity
     // USART0 Receiver: On
@@ -42,17 +44,17 @@ void main(void)
         SPI_MasterTransmit(USART_Receive());    
     }
 }
-unsigned char USART_Receive( void ) {
-    /* Wait for data to be received */
-    while ( !(UCSR0A & (1<<RXC0)) )
+unsigned char USART_Receive( void ) {   //데이터 시트에 있는 함수
+    /* 데이터 수신시까지 대기 하는 코드 */
+    while ( !(UCSR0A & (1<<RXC0)) )         /*데이터 수신이 완료될경우, RXC0가 1이 된다.*/
     ;
-    /* Get and return received data from buffer */
+    /* 수신이 완료된 데이터를 이 함수를 호출한 곳으로 반환한다. */
     return UDR0;
 }
-void SPI_MasterTransmit(unsigned char cData) {
-    /* Start transmission */
+void SPI_MasterTransmit(unsigned char cData) {     //데이터 시트에 있는 함수
+    /* 전송 시작 코드 */
     SPDR = cData;
-    /* Wait for transmission complete */
+    /* 전송이 완료될때까지 대기 */
     while(!(SPSR & (1<<SPIF)))
     ;
 }
